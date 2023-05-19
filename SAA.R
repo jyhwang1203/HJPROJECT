@@ -12,14 +12,12 @@ RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::se
   mutate(STD_DT=as.Date(STD_DT))
 STDDT <- "2023-04-30"%>%as.Date()
 
-
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/Quant UDF.r")
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/SOURCE V3.r")
-#macro1<- RAWDATA%>%select(STD_DT,US30Y,US2Y,USBR,US10Y,UK10Y,DEM10Y,KR10Y,CN10Y,FR10Y,JP10Y)
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/CMA.R")
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/MVO_TARGETRT.R")
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/MVO_Voltarget.R")
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/BAA V2.R")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/CMA.R")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/MVO_TARGETRT.R")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/MVO_Voltarget.R")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/BAA V2.R")
 
 
 

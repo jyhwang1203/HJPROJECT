@@ -167,7 +167,7 @@ return(RT)
 #   RET_OFF$variable%>%unique)
 # RT%>% select(WORLD) %>%filter(WORLD>0)%>%nrow/RT %>% select(WORLD) %>%nrow  
 # RT%>% select(BM) %>%filter(BM>0)%>%nrow/RT %>% select(BM) %>%nrow  
-RT%>% select(BAA) %>%filter(BAA>0)%>%nrow/RT %>% select(BAA) %>%nrow
+
  # write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)
  # write.xlsx(RET_BAA ,"c:/work/BAA.xlsx", sheetName="RET_BAA",append=T)
  # write.xlsx(INDEX ,"c:/work/BAA.xlsx", sheetName="INDEX",append=T)
