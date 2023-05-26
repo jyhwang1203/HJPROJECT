@@ -15,9 +15,12 @@ ipak(pkg)
       # RAWDATA3           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="AL")[,-1]
       # RAWDATA4           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FX")[,-1]
       # RAWDATA5           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FEPS")[,-1]
-      # RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="MACRO")[,-1]
+      # RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="TPER")[,-1]
+      # RAWDATA7           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RATE")[,-1]
+      # RAWDATA8           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RISK")[,-1]
       # colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
-      # RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6)
+      # colnames(RAWDATA6) <- paste0("FPER_",colnames(RAWDATA6))
+      # RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8)
       # STD_DT            <-  RAWDATA[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
       # RAWDATA           <-  cbind(STD_DT,RAWDATA[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
       # TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)%>%fillf
@@ -25,18 +28,22 @@ ipak(pkg)
       # 
       # write.csv(RAWDATAFULL,"c:/work/RAWDATAFULL.csv")
 
+      
       RAWDATA1           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="FI")
       RAWDATA2           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="EQ")[,-1]
       RAWDATA3           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="AL")[,-1]
       RAWDATA4           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="FX")[,-1]
       RAWDATA5           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="FEPS")[,-1]
-      RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="MACRO")[,-1]
+      RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="TPER")[,-1]
+      RAWDATA7           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="RATE")[,-1]
+      RAWDATA8           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="RISK")[,-1]
       colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
-      RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6)%>%fillf
+      colnames(RAWDATA6) <- paste0("FPER_",colnames(RAWDATA6))
+      RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8)
 
       STD_DT            <-  RAWDATA[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
       RAWDATA           <-  cbind(STD_DT,RAWDATA[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
-      TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)
+      TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)%>%fillf
       RAWDATA2           <-  data.frame(STD_DT,TEMP)%>%mutate(STD_DT=as.Date(STD_DT))%>%melt(id.vars="STD_DT")
 
       RAWDATAFULL<- read.csv("c:/work/RAWDATAFULL.csv")%>%select(-X)%>%
@@ -78,7 +85,7 @@ ipak(pkg)
     # 
     # 
 
-      macro1 <- RAWDATA%>%select(STD_DT,UK10Y,DEM10Y,KR10Y,CN10Y,FR10Y,JP10Y,MOVE)
+      macro  <- RAWDATA%>%select(STD_DT,UK10Y,DEM10Y,KR10Y,CN10Y,FR10Y,JP10Y,MOVE,HYSP,VIX)
       eq     <- RAWDATA%>%select(STD_DT,WORLD,DM,EM,DOW,SP500,NASDAQ,KOSPI,EURO50,FTSE,NIKKEI,NIFTY,DAX,CAC,TSX,BVSP,NIFTY,SHANGHAI,CSI300,HANGS,KOSDAQ,
                                USGROWTH,USVALUE,USLVOL,USHDIV,USMOM,USQUAL,KRGROWTH,KRVALUE,MSEX,MSSZ,MSSM,MSBG)
       fi   <- RAWDATA%>%select(STD_DT,WRBOND,WRGOVT,WRIG,WRHY,USGOVT,USBOND,USIG,USHY,EUBOND,EUIG,EUHY,EUGOVT,KRBOND,EMBOND,CNBOND,USLONG,USSHORT,USMID)
@@ -89,21 +96,22 @@ ipak(pkg)
                                FEPS_USGROWTH,FEPS_USVALUE,FEPS_USLVOL,FEPS_USHDIV,FEPS_USMOM,
                                FEPS_USQUAL,FEPS_KRGROWTH,FEPS_KRVALUE,FEPS_MSSZ,FEPS_MSSM,FEPS_MSBG
                                )
-      getSymbols('VIXCLS', src='FRED')
-      getSymbols('FEDFUNDS', src='FRED')
-      getSymbols('DGS30', src='FRED')
-      getSymbols('DGS10', src='FRED')
-      getSymbols('DGS2', src='FRED')
-      getSymbols('BAMLC0A0CM', src='FRED')
-      getSymbols('DFII10', src='FRED')
-
-      getSymbols('BAMLH0A0HYM2', src='FRED')
-      getSymbols('DTWEXBGS', src='FRED')
-      getSymbols('DEXKOUS', src='FRED')
-
-      macro2<- cbind(DGS30,DGS10,DGS2,BAMLC0A0CM,BAMLH0A0HYM2,VIXCLS,DTWEXBGS,DEXKOUS,DFII10,FEDFUNDS)%>%dt_trans%>%exname()
-
-      macro <- macro1%>%full_join(macro2,by="STD_DT")%>%fillf
+# 
+#       getSymbols('VIXCLS', src='FRED')
+#       getSymbols('FEDFUNDS', src='FRED')
+#       getSymbols('DGS30', src='FRED')
+#       getSymbols('DGS10', src='FRED')
+#       getSymbols('DGS2', src='FRED')
+#       getSymbols('BAMLC0A0CM', src='FRED')
+#       getSymbols('DFII10', src='FRED')
+# 
+#       getSymbols('BAMLH0A0HYM2', src='FRED')
+#       getSymbols('DTWEXBGS', src='FRED')
+#       getSymbols('DEXKOUS', src='FRED')
+# 
+#       macro2<- cbind(DGS30,DGS10,DGS2,BAMLC0A0CM,BAMLH0A0HYM2,VIXCLS,DTWEXBGS,DEXKOUS,DFII10,FEDFUNDS)%>%dt_trans%>%exname()
+# 
+#       macro <- macro1%>%full_join(macro2,by="STD_DT")%>%fillf
 
       std <- cbind(eq,fi[,-1],al[,-1],feps[,-1]) %>% filter(STD_DT==(STDDT))
       week<- cbind(eq,fi[,-1],al[,-1],feps[,-1]) %>% filter(STD_DT==(STDDT%m-%weeks(1))) 

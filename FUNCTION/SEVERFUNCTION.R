@@ -26,6 +26,11 @@ server <- function(input, output){
   output$stfepsytd <- renderPlot({graphbar(retstfeps_ytd,"orange","YTD(EPS)")})  
   
   
+  output$EPS <- renderPlot({
+    RAWDATA[,c("STD_DT",input$EQ)]%>%as.data.frame%>%filter(STD_DT >= input$DATE[1] & STD_DT <= input$DATE[2])%>%reshape2::melt(id.vars="STD_DT")%>%na.omit%>%ggplot(aes(x=STD_DT, y=value, group = variable))+ 
+      geom_line(alpha = 1, aes(col=(variable))) 
+  })
+  
   output$tbl <- renderDT({
     if(input$table=="EPS"){
       data.frame(bind_rows(retfeps_wek,retfeps_mon,retfeps_ytd,retfeps_yea))%>%mutate(INDEX=c("1WEEK(%)","1MONTH(%)","YTD(%)","1 YEAR(%)"))%>%relocate(INDEX)

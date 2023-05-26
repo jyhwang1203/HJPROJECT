@@ -19,7 +19,7 @@ BASEKR$Dxt
 LCfit  <- StMoMo::fit(LC, data = BASEKR, ages.fit = ages.fit)
 APCfit <- StMoMo::fit(APC, data = BASEKR, ages.fit = ages.fit, wxt = wxt)
 CBDfit <- StMoMo::fit(CBD, data = BASEKR, ages.fit = ages.fit, wxt = wxt)
-RHfit <-  StMoMo::fit(RH, data = BASEKR, ages.fit = ages.fit, wxt = wxt,start.ax = LCfit$ax, start.bx = LCfit$bx, start.kt = LCfit$kt)
+#RHfit <-  StMoMo::fit(RH, data = BASEKR, ages.fit = ages.fit, wxt = wxt,start.ax = LCfit$ax, start.bx = LCfit$bx, start.kt = LCfit$kt)
 
 
 LCfitm  <- StMoMo::fit(LC, data = BASEKRM, ages.fit = ages.fit)
@@ -121,16 +121,16 @@ g1 <-TEMPM%>%select(STD_DT,LL,LSTM,REAL,ARIMA,APC,CBD,RH)%>%filter(STD_DT>1970)%
 
 lcax <- data.frame(STD_DT=c(20:70),TOTAL=LCfit$ax,
                   MALE=LCfitm$ax,
-                  FEMALE=LCfitf$ax)
+                  FEMALE=LCfitf$ax)%>%round(2)
 colnames(lcax)[-1] <-  c("TOTAL","MALE","FEMALE")
 
 lcbx <-data.frame(STD_DT=c(20:70),TOTAL=LCfit$bx,
                   MALE=LCfitm$bx,
-                  FEMALE=LCfitf$bx)
+                  FEMALE=LCfitf$bx)%>%round(4)
 colnames(lcbx)[-1] <-  c("TOTAL","MALE","FEMALE")
 lckt <-data.frame(STD_DT=c(1970:2021),TOTAL=LCfit$kt%>%t,
                   MALE=LCfitm$kt%>%t,
-                  FEMALE=LCfitf$kt%>%t)
+                  FEMALE=LCfitf$kt%>%t)%>%round(2)
 colnames(lckt)[-1] <-  c("TOTAL","MALE","FEMALE")
 lckt$FEMALE
 lckt$MALE

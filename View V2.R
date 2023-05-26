@@ -10,16 +10,32 @@ ipak(pkg)
 
 RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
             mutate(STD_DT=as.Date(STD_DT))
-STDDT <- "2023-05-17"%>%as.Date()
+STDDT <- "2023-05-24"%>%as.Date()
 # source("c:/work/SOURCE V3.r")
 # 
-# source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/HWANG/MARKDOWN/SEVERFUNCTION.r")
-# source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/HWANG/RCODE/Quant UDF.r")
-source("c:/Users/ghkdw/OneDrive/바탕 화면/황지연/NaverCloud/R-CODE/FUNCTION/SOURCE V3.r")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
 
-#macro1<- RAWDATA%>%select(STD_DT,US30Y,US2Y,USBR,US10Y,UK10Y,DEM10Y,KR10Y,CN10Y,FR10Y,JP10Y)
-
-
+EQUITY <- c("글로벌주식"="FEPS_WORLD",
+  "선진국주식"          ="FEPS_DM",
+  "신흥국주식"          ="FEPS_EM",
+  "다우지수"            ="FEPS_DOW",
+  "S&P500"              ="FEPS_SP500",
+  "나스닥"              ="FEPS_NASDAQ",
+  "코스피"              ="FEPS_KOSPI",
+  "유로스톡스"          ="FEPS_EURO50", 
+  "FTSE"                ="FEPS_FTSE",
+  "니케이"              ="FEPS_NIKKEI",
+  "독일DAX"             ="FEPS_DAX",
+  "프랑스CAC"           ="FEPS_CAC",
+  "캐나나TSX"           ="FEPS_TSX",
+  "보베스파"            ="FEPS_BVSP",
+  "상해지수"            ="FEPS_SHANGHAI",
+  "CSI300"              ="FEPS_CSI300",
+  "항셍"                ="FEPS_HANGS",
+  "니프티"              ="FEPS_NIFTY"
+  #"글로벌주식"="WORLD",
+)
 
 cols <- names(retsy)
 
@@ -29,10 +45,13 @@ ui <-
              tabPanel("주요주가지수",
                       dashboardPage(
                         dashboardHeader(title = "View"),
-                        dashboardSidebar(selectInput("table", "Variable:",
-                                                     c("수익률" = "RT",
-                                                       "이익전망" = "EPS"))
-                                         
+                        dashboardSidebar(dateRangeInput('DATE',
+                                                        label = '',
+                                                        start = as.Date('2018-01-01') , end = as.Date('2023-12-31')),
+                                         selectInput("table", "Variable:",
+                                                     c("수익률"   = "RT",
+                                                       "이익전망" = "EPS")),
+                                         checkboxGroupInput("EQ", "EQUITY", EQUITY)
                         ),
                         dashboardBody(
                             fluidRow(
@@ -48,7 +67,7 @@ ui <-
                           fluidRow(box(plotOutput("fepsrtw"), width = 3, solidHeader = TRUE,background = "red"),box(plotOutput("fepsrtm"), width = 3, solidHeader = TRUE,background = "blue"),
                                    box(plotOutput("fepsytd"), width = 3, solidHeader = TRUE,background = "orange"),box(plotOutput("fepsrty"), width = 3, solidHeader = TRUE,background = "green")),
                           fluidRow(box(DTOutput("tbl"), width = NULL, solidHeader = TRUE)),
-                          fluidRow(box(plotOutput("rollcor3"), width =NULL))
+                          fluidRow(box(plotOutput("EPS"), width =NULL))
                           
                         ))),
              

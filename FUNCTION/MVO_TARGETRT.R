@@ -26,7 +26,7 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
     h[5 ] <- w[5]
     h[6 ] <- w[6]
     h[7 ] <-  -w[3]-w[4] + 0.4
-    h[8 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
+    #h[8 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
     return( h )
   }
   
@@ -36,7 +36,7 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
                    hin = hin.objective,
                    heq = heq.objective,
                    control = list(xtol_rel = 1e-8),lower = rep(wl, n),
-                   upper = rep(0.3, n))
+                   upper = rep(1, n))
   
   
   #결과값
@@ -48,7 +48,7 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
 } 
 
 
-wei1<- MVO_TARGETRT(mu24,12*cov24,trate=0.065,n=6,wl=0.03,0.08)%>%as.matrix()
+wei1<- MVO_TARGETRT(mu24,12*cov24,trate=0.073,n=6,wl=0.03,0.08)%>%as.matrix()
 wei2<- MVO_TARGETRT(mu24,12*cov24,trate=0.062,n=6,wl=0.03,0.08)%>%as.matrix()
 wei3<- MVO_TARGETRT(mu24,12*cov24,trate=0.059,n=6,wl=0.03,0.08)%>%as.matrix()
 wei4<- MVO_TARGETRT(mu24,12*cov24,trate=0.056,n=6,wl=0.03,0.08)%>%as.matrix()

@@ -146,6 +146,8 @@ RES2[is.na(RES2)] <- 0
 return(RT)
   }
   
+RES1  <-   UNIV%>%filter(STD_DT>"2022-12-31")
+write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)  
 #   UNIV%>%select(-state)%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +
 #     geom_line(size=1)+
 #     ggtitle("누적수익률") +

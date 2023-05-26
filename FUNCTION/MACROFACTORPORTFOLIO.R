@@ -112,20 +112,26 @@ tmp <- list()
   rownames(coeff) <-c("MSUS","MSKR","USGOVT","KRBOND","WRINFRA","WREPRA","CRBTR","EMBOND","USIG","MSEU","EM","HMACRO","HFRI")
   TMP2 <-retm %>% filter(STD_DT<STDDT1&STD_DT>STDDT1-years(10))
   REG1 <- lm(WORLD~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
-  REG2 <- lm(WRBOND~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
-  REG3 <- lm(AL~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
-  REG4 <- lm(GSCI~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG2 <- lm(MSKR~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG3 <- lm(WRBOND~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG4 <- lm(KRBOND~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG5 <- lm(AL~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG6 <- lm(GSCI~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
   
   
   fcoeff <- rbind(REG1$coefficients[-1,1],
                   REG2$coefficients[-1,1],
                   REG3$coefficients[-1,1],
-                  REG4$coefficients[-1,1])
+                  REG4$coefficients[-1,1],
+                  REG5$coefficients[-1,1],
+                  REG6$coefficients[-1,1]
+                  )
 
-  eb <<-(fcoeff[1,]*0.35+ fcoeff[2,]*0.3+ fcoeff[3,]*0.3+fcoeff[3,]*0.05)
+  #eb <<-(fcoeff[1,]*0.35+ fcoeff[2,]*0.3+ fcoeff[3,]*0.3+fcoeff[3,]*0.05)
+  eb <<-(fcoeff[1,]*0.3+ fcoeff[2,]*0.047+ fcoeff[3,]*0.251+fcoeff[4,]*0.149+fcoeff[5,]*0.223+fcoeff[6,]*0.03)
   
   n <- coeff %>% nrow
-  wei<- data.frame(as.data.frame(t(MVO(eb,TMP,0.99,coeff,0.03,n))))
+  wei<- data.frame(as.data.frame(t(MVO(eb,TMP,0.99,coeff,0.0,n))))
   tmp$wei <- cbind(STDDT1,wei)
   colnames(wei) <-c("MSUS","MSKR","USLONG","KRBOND","WRINFRA","WREPRA","CRBTR","EMBOND","USIG","USHY","EM","HMACRO","HFRI")
   ret2<- retm%>%filter(STD_DT==(STDDT1-days(1)))%>%melt(id.vars="STD_DT")
