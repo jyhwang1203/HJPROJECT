@@ -10,7 +10,7 @@ ipak(pkg)
 
 RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
             mutate(STD_DT=as.Date(STD_DT))
-STDDT <- "2023-05-24"%>%as.Date()
+STDDT <- "2023-05-31"%>%as.Date()
 # source("c:/work/SOURCE V3.r")
 # 
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")

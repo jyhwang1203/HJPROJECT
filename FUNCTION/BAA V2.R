@@ -11,14 +11,16 @@ ipak(pkg)
 
 # RAWDATA           <-        read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE,header=T) %>% select(-X) %>%as.data.frame()%>%
 # mutate(STD_DT=STD_DT%>%as.Date())
-TEMP      <-  readxl::read_excel("c:/work/universe.xlsx",sheet="Sheet2")
-#TEMP      <-  readxl::read_excel("c:/work/PAA.xlsx",sheet="Sheet2")
-STD_DT             <-  TEMP[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
-TEMP            <-  cbind(STD_DT,TEMP[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
-TEMP2               <-  apply(TEMP%>%select(-STD_DT), 2, as.numeric)
+# TEMP      <-  readxl::read_excel("c:/work/universe.xlsx",sheet="ETF")
+# 
+# #TEMP      <-  readxl::read_excel("c:/work/PAA.xlsx",sheet="Sheet2")
+# STD_DT             <-  TEMP[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
+# TEMP            <-  cbind(STD_DT,TEMP[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
+# TEMP2               <-  apply(TEMP%>%select(-STD_DT), 2, as.numeric)
+# 
 
-
-PAA           <-  data.frame(STD_DT,TEMP2)%>%mutate(STD_DT=as.Date(STD_DT))%>%fillf
+#PAA           <-  data.frame(STD_DT,TEMP2)%>%mutate(STD_DT=as.Date(STD_DT))%>%fillf
+PAA           <-  RAWDATA%>%select(STD_DT,TIP,DBC,UUP,TLT,LQD,AGG,IEF,BIL,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,TLT,HYG,LQD)
 
 #CANARY <- PAA%>%select(STD_DT,AGG,SPY,VWO,VEA)%>%fillf%>%trans_rt("month")%>%dt_trans()
 CANARY <- retm
@@ -40,9 +42,9 @@ RES <- lapply(c(13:ll),function(T){
   p3 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-3]) %>%.[-1]   
   p6 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-6]) %>%.[-1]   
   p12<- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-12])%>%.[-1]   
-
-  mom<- 12*(p0/p1-1)+4*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
-       
+  
+   mom<- 12*(p0/p1-1)+4*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
+  
   res<- data.frame(STD_DT,mom)
 return(res)
 })
@@ -50,12 +52,44 @@ return(res)
 RES2 <- do.call(rbind,RES)
 RES2[is.na(RES2)] <- 0
 
-#RES2<- RES2%>%na.omit
 
+
+RES <- lapply(c(13:ll),function(T){
+  
+  STD_DT <-DATE[T]
+  p0 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T])%>%.[-1]   
+  p1 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-1]) %>%.[-1]   
+  p3 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-3]) %>%.[-1]   
+  p6 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-6]) %>%.[-1]   
+  p12<- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-12])%>%.[-1]   
+  
+  
+  mom<- 6*(p0/p1-1)+3*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
+  res<- data.frame(STD_DT,mom)
+  return(res)
+})
+
+RES2 <- do.call(rbind,RES)
+RES2[is.na(RES2)] <- 0
+
+# RES2 <-RES2 %>% left_join(BASE%>%mutate(STD=BAMLH0A0HYM2-BASE)%>%select(STD_DT,STD),by="STD_DT")
+
+  # UNIV <- data.frame(rbind(RES2%>%filter(USBOND<0|SP500<0|DM<0|EM<0|STD>0)%>%mutate(state=0),
+  # RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0&STD<=0)%>%mutate(state=1)))%>%arrange(STD_DT) 
+  
   UNIV <- data.frame(rbind(RES2%>%filter(USBOND<0|SP500<0|DM<0|EM<0)%>%mutate(state=0),
-  RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0)%>%mutate(state=1)))%>%arrange(STD_DT)
-
-
+                           RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0)%>%mutate(state=1)))%>%arrange(STD_DT) 
+  # TEMP <- (BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT>"2007-01-01")%>%na.omit%>%.[,1])%>%as.data.frame()
+  # n <- nrow(TEMP)
+  # BASE <- lapply(c(1:n),function(t){
+  # data.frame(
+  # STD_DT = TEMP[t,1],
+  # HYSP =  BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT==TEMP[t,1])%>%.[,-1]%>%as.data.frame,
+  # BASE =  BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT<TEMP[t,1]&STD_DT>(TEMP[t,1]%>%as.Date-years(10)))%>%as.data.frame%>%.[,-1]%>%na.omit%>%mean)
+  # })
+  # 
+  # BASE <- do.call(rbind,BASE)
+  
  #수익률이 아니라 가격임
  #sma filter
   SMA   <- CANARY%>%select(STD_DT)%>%left_join(PAA,by="STD_DT")%>%mutate(cash=100*1)%>%mutate(cash2=100*1)%>%mutate(cash3=100)%>%mutate(BIL2=BIL)%>%mutate(BIL3=BIL)
@@ -143,11 +177,13 @@ RES2[is.na(RES2)] <- 0
   RT <-  rbind(RET_OFF%>%aggregate(value~STD_DT,mean),RET_DEF%>%aggregate(value~STD_DT,mean))%>%dplyr::arrange(STD_DT)%>%mutate(STD_DT=lead(STD_DT))%>%
         left_join(retm%>%select(STD_DT,BM,WORLD),by="STD_DT")%>%na.omit%>%filter(STD_DT>=STDDT&STD_DT<STDDT2)
   colnames(RT)[2]<-"BAA"
+  RT[,-1]<- RT[,-1] %>%round(3)
 return(RT)
   }
-  
-RES1  <-   UNIV%>%filter(STD_DT>"2022-12-31")
-write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)  
+ #  res  <- BAA("2008-01-01","2023-06-30","G12",n=12,nn=2,"UUP")%>%cuml
+ BAA("2012-06-30","2023-06-30","G12",n=12,nn=2,"UUPX")%>%cuml
+# RES1  <-   UNIV%>%filter(STD_DT>"2022-12-31")
+# write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)  
 #   UNIV%>%select(-state)%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +
 #     geom_line(size=1)+
 #     ggtitle("누적수익률") +
@@ -170,7 +206,7 @@ write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)
 # RT%>% select(WORLD) %>%filter(WORLD>0)%>%nrow/RT %>% select(WORLD) %>%nrow  
 # RT%>% select(BM) %>%filter(BM>0)%>%nrow/RT %>% select(BM) %>%nrow  
 
- # write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)
+ # write.xlsx(res ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)
  # write.xlsx(RET_BAA ,"c:/work/BAA.xlsx", sheetName="RET_BAA",append=T)
  # write.xlsx(INDEX ,"c:/work/BAA.xlsx", sheetName="INDEX",append=T)
  # write.xlsx(PA_BAA ,"c:/work/BAA.xlsx", sheetName="PA_BAA",append=T)

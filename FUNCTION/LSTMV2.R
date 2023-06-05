@@ -192,7 +192,6 @@ grid.arrange(g1,g2,
              ncol = 2, nrow = 1)
 g2<- lckt%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
   geom_line()+ggtitle("KAPPA") +
-  
   theme(legend.text = element_text(size=15))
 res%>%as.data.frame%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
   geom_line()

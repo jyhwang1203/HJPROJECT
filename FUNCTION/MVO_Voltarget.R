@@ -3,29 +3,30 @@
     vol2<<-vol
     wl2<<- wl
    objective_mvo = function(w) {
-    obj =  0.5*((t(w) %*% cov %*% w)) -  t(w) %*% t(mu)
+    obj =  1*((t(w) %*% cov %*% w)) -  t(w) %*% t(mu)
     return(obj)
   }
   
   
   heq.objective = function(w) {
    
-   sum <- numeric(1)
+   sum <- numeric(2)
     sum[1] = sum(w)-1
-  
+    sum[2 ] = -((t(w) %*% cov %*% w))^0.5 + vol
     return( sum )
   }
 
   hin.objective <- function(w) {
-    h <- numeric(7)
+      h <- numeric(7)
       h[1 ] <- w[1]
       h[2 ] <- w[2]
       h[3 ] <- w[3]
       h[4 ] <- w[4]
       h[5 ] <- w[5]
       h[6 ] <- w[6]
-      #h[7 ] <-  -w[3]-w[4] + 0.4
-      h[7 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
+      h[7 ] <-  -w[3]-w[4] + 0.4
+     # h[8 ] <- t(w) %*% t(mu) - trate
+    #  h[8 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
       return( h )
       }
     
@@ -35,7 +36,7 @@
                    hin = hin.objective,
                    heq = heq.objective,
                    control = list(xtol_rel = 1e-8),lower = rep(wl, n),
-                   upper = rep(1, n))
+                   upper = rep(0.3, n))
   
  
   #결과값
@@ -46,12 +47,12 @@
   
   }
 
-  weiv1<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.16)%>%as.matrix()
-  weiv2<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.14)%>%as.matrix()
-  weiv3<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.12)%>%as.matrix()
-  weiv4<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.10)%>%as.matrix()
-  weiv5<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.08)%>%as.matrix()
-  weiv6<- MVO_VOLTARGET(mu23,12*cov23,trate=0.03,n=6,wl=0.03,0.06)%>%as.matrix()
+  weiv1<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.16)%>%as.matrix()
+  weiv2<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.14)%>%as.matrix()
+  weiv3<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.12)%>%as.matrix()
+  weiv4<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.10)%>%as.matrix()
+  weiv5<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.08)%>%as.matrix()
+  weiv6<- MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.06)%>%as.matrix()
  
   G1VOL <- weiv1%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+   ggtitle(paste0("최소자산비중=",wl2,"목표변동성=","16%")) 
   G2VOL <- weiv2%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+   ggtitle(paste0("최소자산비중=",wl2,"목표변동성=","14%")) 
@@ -63,15 +64,15 @@
   
   
   temp <- rbind(
-    c((weiv1) %*% t(mu23), ((weiv1) %*%(12*cov23)%*% t(weiv1))^0.5),
-    c((weiv2) %*% t(mu23), ((weiv2) %*%(12*cov23)%*% t(weiv2))^0.5),
-    c((weiv3) %*% t(mu23), ((weiv3) %*%(12*cov23)%*% t(weiv3))^0.5),
-    c((weiv4) %*% t(mu23), ((weiv4) %*%(12*cov23)%*% t(weiv4))^0.5),
-    c((weiv5) %*% t(mu23), ((weiv5) %*%(12*cov23)%*% t(weiv5))^0.5),
-    c((weiv6) %*% t(mu23), ((weiv6) %*%(12*cov23)%*% t(weiv6))^0.5))%>%data.frame
+    c((weiv1) %*% t(mu24), ((weiv1) %*%(12*cov24)%*% t(weiv1))^0.5),
+    c((weiv2) %*% t(mu24), ((weiv2) %*%(12*cov24)%*% t(weiv2))^0.5),
+    c((weiv3) %*% t(mu24), ((weiv3) %*%(12*cov24)%*% t(weiv3))^0.5),
+    c((weiv4) %*% t(mu24), ((weiv4) %*%(12*cov24)%*% t(weiv4))^0.5),
+    c((weiv5) %*% t(mu24), ((weiv5) %*%(12*cov24)%*% t(weiv5))^0.5),
+    c((weiv6) %*% t(mu24), ((weiv6) %*%(12*cov24)%*% t(weiv6))^0.5))%>%data.frame
   
   colnames(temp) <- c("mean","vol")
-  temp <-temp %>% mutate(SR=(mean-0.02)/vol)%>%round(4)
+  temp <-temp %>% mutate(SR=(mean)/vol)%>%round(4)
   
   
   voltarget <-  cbind(
@@ -85,8 +86,8 @@
       weiv5%>%data.frame,
       weiv6%>%data.frame))%>%as.data.frame()
 
-  # voltarget
-  # write.xlsx(voltarget ,"c:/work/MP.xlsx", sheetName="voltarget",append=T)
+  voltarget
+  # write.xlsx(voltarget ,"c:/work/MP.xlsx", sheetName="voltarget",append=F)
 #  G6<- MVO_VOLTARGET(mu23,12*cov,trate=0,n=6,wl=0.03,0.14)%>%data.frame%>%t%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+
 #    ggtitle(paste0("wl=",wl2,"vol=",vol2)) 
 #  G7<- MVO_VOLTARGET(mu,12*cov,trate=0,n=6,wl=0.03,0.12)%>%data.frame%>%t%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+
@@ -99,6 +100,7 @@
 #    ggtitle(paste0("wl=",wl2,"vol=",vol2)) 
 #  grid.arrange(G1,G2,G3,G4,G5,G6,G7,G8,G9,G10,ncol=5)
 #  
+
  
   
   

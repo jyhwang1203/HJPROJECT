@@ -4,7 +4,7 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
   trate0 <<- trate
   wl2<<- wl
   objective_mvo = function(w) {
-    obj =  0.5*((t(w) %*% cov %*% w)) -  t(w) %*% t(mu)
+    obj = 1 *((t(w) %*% cov %*% w)) -  t(w) %*% t(mu)
     return(obj)
   }
   
@@ -13,20 +13,22 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
     
     sum <- numeric(2)
     sum[1] = sum(w)-1
+    #sum[2 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
     sum[2] = t(w) %*%t(mu) - trate
     return( sum )
   }
   
   hin.objective <- function(w) {
-    h <- numeric(8)
+    h <- numeric(7)
     h[1 ] <- w[1]
     h[2 ] <- w[2]
     h[3 ] <- w[3]
     h[4 ] <- w[4]
     h[5 ] <- w[5]
     h[6 ] <- w[6]
-    h[7 ] <-  -w[3]-w[4] + 0.4
-    #h[8 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
+    h[7 ] <- -w[3]-w[4] + 0.4
+ #  h[7 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
+  #  h[7 ] <- t(w) %*% t(mu) - trate
     return( h )
   }
   
@@ -36,7 +38,7 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
                    hin = hin.objective,
                    heq = heq.objective,
                    control = list(xtol_rel = 1e-8),lower = rep(wl, n),
-                   upper = rep(1, n))
+                   upper = rep(0.3, n))
   
   
   #결과값
@@ -48,12 +50,14 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
 } 
 
 
-wei1<- MVO_TARGETRT(mu24,12*cov24,trate=0.073,n=6,wl=0.03,0.08)%>%as.matrix()
-wei2<- MVO_TARGETRT(mu24,12*cov24,trate=0.062,n=6,wl=0.03,0.08)%>%as.matrix()
-wei3<- MVO_TARGETRT(mu24,12*cov24,trate=0.059,n=6,wl=0.03,0.08)%>%as.matrix()
-wei4<- MVO_TARGETRT(mu24,12*cov24,trate=0.056,n=6,wl=0.03,0.08)%>%as.matrix()
-wei5<- MVO_TARGETRT(mu24,12*cov24,trate=0.053,n=6,wl=0.03,0.08)%>%as.matrix()
-wei6<- MVO_TARGETRT(mu24,12*cov24,trate=0.050,n=6,wl=0.03,0.08)%>%as.matrix()
+trate <- (WRGDP+WRCPI+KRGDP+KRCPI)/200
+
+wei1<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.16)%>%as.matrix()
+wei2<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.14)%>%as.matrix()
+wei3<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.12)%>%as.matrix()
+wei4<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.10)%>%as.matrix()
+wei5<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.08)%>%as.matrix()
+wei6<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.06)%>%as.matrix()
 
 wei1%>%as.data.frame()%>% reshape2::melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+ ggtitle(paste0("최소자산비중=",wl2,"목표수익률=",0.065)) 
 
@@ -64,7 +68,7 @@ G4TRT <- wei4%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=vari
 G5TRT <- wei5%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+   ggtitle(paste0("최소자산비중=",wl2,"목표수익률=",0.045)) 
 G6TRT <- wei6%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+   ggtitle(paste0("최소자산비중=",wl2,"목표수익률=",0.040)) 
 GR_TARGETRT<- grid.arrange(G1TRT,G2TRT,G3TRT,G4TRT,G5TRT,ncol=5)
-GR_TARGETRT
+
 temp <- rbind(
   c((wei1) %*% t(mu24), ((wei1) %*%(12*cov24)%*% t(wei1))^0.5),
   c((wei2) %*% t(mu24), ((wei2) %*%(12*cov24)%*% t(wei2))^0.5),
@@ -74,10 +78,10 @@ temp <- rbind(
   c((wei6) %*% t(mu24), ((wei6) %*%(12*cov24)%*% t(wei6))^0.5))%>%data.frame
 
 colnames(temp) <- c("mean","vol")
-temp <-temp %>% mutate(SR=(mean-0.02)/vol)%>%round(4)
+temp <-temp %>% mutate(SR=(mean)/vol)%>%round(4)
 
 targetrt <-  cbind(
-  target=c("6.5%","6.2%","5.9%","5.6%","5.3%","5%"),
+  targetvol= c("16%","14%","12%","10%","8%","6%"),
   temp,
   rbind(
   wei1%>%data.frame,
@@ -86,11 +90,32 @@ targetrt <-  cbind(
   wei4%>%data.frame,
   wei5%>%data.frame,
   wei6%>%data.frame))%>%as.data.frame()
+targetrt
 # 
-# write.xlsx(targetrt ,"c:/work/MP.xlsx", sheetName="targetrt",append=T)
+# write.xlsx(targetrt ,"c:/work/MP.xlsx", sheetName="targetrt",append=F)
+# write.xlsx(targetrt2 ,"c:/work/MP.xlsx", sheetName="targetrt2",append=T)
+# write.xlsx(voltarget ,"c:/work/MP.xlsx", sheetName="voltarget",append=T)
 # 
+# write.xlsx(ef ,"c:/work/MP.xlsx", sheetName="ef",append=T)
 # 
-# 
-# 
-# 
+# write.xlsx(ef2 ,"c:/work/MP.xlsx", sheetName="ef2",append=T)
 # targetrt
+# ef<-sapply(c(1:500),function(t){
+# trate <- 0.03 + 0.0001*t
+# #trate
+# 
+#  wei<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.16)%>%as.matrix()
+# c(wei%*% t(mu24), ((wei1 %*%(12*cov24)%*% t(wei))^0.5))
+# }
+# 
+# )%>%t
+# 
+# ef2<-sapply(c(1:500),function(t){
+#   vol <- 0.06 + 0.002*t
+#   
+#   
+#   wei<-  MVO_VOLTARGET(mu24,12*cov24,trate=trate,n=6,wl=0.03,vol=0.16)%>%as.matrix()
+#   c(wei%*% t(mu24), ((wei1 %*%(12*cov24)%*% t(wei))^0.5))
+# }
+# 
+# )%>%t

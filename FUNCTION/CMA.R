@@ -73,7 +73,13 @@ GDPCPIF          <-  data.frame(STD_DT,TEMP)%>%fillf
       WRGDP24 <- GDPCPIF%>%select(STD_DT,WRGDP24)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
       WRCPI23 <- GDPCPIF%>%select(STD_DT,WRCPI23)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
       WRCPI24 <- GDPCPIF%>%select(STD_DT,WRCPI24)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
-        
+      WRGDP = (2.6 + 2.7)/2
+      KRGDP = (1.2 + 2.2)/2
+      WRCPI = (5.5 + 3.5)/2
+      KRCPI = (3.3 + 2  )/2
+      
+      WRGDP+WRCPI+2.24
+      KRGDP+KRCPI+2.22
       rt_eqwr23 <- WRGDP23+WRCPI23+2
       rt_eqwr24 <- WRGDP24+WRCPI24+2
       
@@ -106,32 +112,34 @@ GDPCPIF          <-  data.frame(STD_DT,TEMP)%>%fillf
       mu23        <- mu23/100
       
       #cov <- retm%>%filter(STD_DT>"2010-01-01") %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cov    
-      cov23 <- covEstimation(retm%>%filter(STD_DT>STDDT-years(5)&STD_DT<=STDDT) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%as.matrix, control = list(type = 'ewma', lambda = 0.94))
+     # cov23 <- covEstimation(retm%>%filter(STD_DT>STDDT-years(5)&STD_DT<=STDDT) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%as.matrix, control = list(type = 'ewma', lambda = 0.94))
    
       STD_DT>STDDT-years(5)
       
       mu24    <-  matrix(0,1,6)
-      mu24[1] <- (WRGDP24+WRCPI24)%>%as.numeric()+2.24
-      mu24[2] <- (KRGDP24+KRCPI24)%>%as.numeric()+2.23
+      mu24[1] <- (WRGDP+WRCPI)%>%as.numeric()+2.24
+      mu24[2] <- (KRGDP+KRCPI)%>%as.numeric()+2.23+1
       mu24[3] <-  rt_fiwr24
       # mu[4]<- 0.0267  +SP[3]/100 - 0.012
       mu24[4] <-  rt_fikr24
       mu24[5] <- (sum(REG5$coefficients[,1] * data.frame(rt_eqwr24,rt_fiwr24))+sum(REG6$coefficients[,1]* data.frame(rt_eqwr24,rt_fiwr24))+sum(REG8$coefficients[,1]* data.frame(rt_eqwr24,rt_fiwr24)))/3
       mu24[6] <-   sum(REG7$coefficients[,1] * data.frame(rt_eqwr24,rt_fiwr24))
       mu24    <- mu24/100
-      cov24   <- retm%>%filter(STD_DT>STDDT-years(10)&STD_DT<=STDDT) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cov    
+      #cov24   <- retm%>%filter(STD_DT>STDDT-years(10)&STD_DT<=STDDT) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cov    
   
-      
+      cov24   <- retm%>%filter(STD_DT>STDDT-years(10)&STD_DT<=STDDT) %>%select(WORLD2,MSKR,WRBOND2,KRBOND,AL2,GSCI2)%>%cov    
+      retm%>%filter(STD_DT>STDDT-years(10)&STD_DT<=STDDT) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cor
+      retm%>%filter(STD_DT>STDDT-years(10)&STD_DT<=STDDT)  %>%select(WORLD2,MSKR,WRBOND2,KRBOND,AL2,GSCI2)%>%cor
       
       CMA <- rbind(mu23,mu24,(cov24%>%diag*12)^0.5)
       rownames(CMA) <- c("return","vol","SR")
       STDDT-years(5)
-      COVLONG  <- retm%>%filter(STD_DT>(STDDT-years(10))) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cov    
-      COVSHORT <-  covEstimation(retm%>%filter(STD_DT>(STDDT-years(5)))  %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%as.matrix, control = list(type = 'ewma', lambda = 0.94))
-       
-      # write.xlsx(CMA ,"c:/work/MP.xlsx", sheetName="CMA",append=F)
-      # write.xlsx(COVLONG%>%cor ,"c:/work/MP.xlsx", sheetName="COVLONG",append=T)
-      # write.xlsx(COVSHORT ,"c:/work/MP.xlsx", sheetName="COVSHORT",append=T)
-
-      
+      COVLONG  <- retm%>%filter(STD_DT>(STDDT-years(10))) %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%cor
+#      COVSHORT <-  covEstimation(retm%>%filter(STD_DT>(STDDT-years(5)))  %>%select(WORLD,MSKR,WRBOND,KRBOND,AL,GSCI)%>%as.matrix, control = list(type = 'ewma', lambda = 0.94))
+   #     
+   #    write.xlsx(CMA ,"c:/work/MP.xlsx", sheetName="CMA",append=T)
+   #    write.xlsx(COVLONG ,"c:/work/MP.xlsx", sheetName="COVLONG",append=T)
+   # #   write.xlsx(COVSHORT ,"c:/work/MP.xlsx", sheetName="COVSHORT",append=T)
+   # 
+   #    
       

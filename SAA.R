@@ -10,7 +10,7 @@ ipak(pkg)
 
 RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
   mutate(STD_DT=as.Date(STD_DT))
-STDDT <- "2023-04-30"%>%as.Date()
+STDDT <- "2023-05-31"%>%as.Date()
 
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
@@ -38,6 +38,7 @@ ui <-
                                          checkboxGroupInput("strategy", "Variables to show:",
                                                             c("BAA"="BAA",
                                                               "60/40"="BM",
+                                                              "50/30/20"="BM2",
                                                               "글로벌주식"="WORLD")),
                                          checkboxGroupInput("univ", "Variables to show:",
                                                             c("달러미포함"="UUPX",
@@ -45,7 +46,7 @@ ui <-
                         ),
                                     
                         dashboardBody( fluidRow(box(plotOutput("BAA3"), width =6),box(plotOutput("BAA9"), width =6)),
-                                       fluidRow(box(DTOutput("BAA1"), width =4),box(DTOutput("BAA8"), width =4),box(plotOutput("BAA6"), width =4)),
+                                       fluidRow(box(DTOutput("BAA1"), width =4),box(DTOutput("BAA8"), width =4),box(DTOutput("BAA6"), width =4)),
                                        fluidRow(box(plotOutput("BAA4"), width =6),box(plotOutput("BAA7"), width =6)),
                                        fluidRow(box(plotOutput("BAA10"), width =12))
                                      )
@@ -114,11 +115,8 @@ output$BAA3 <- renderPlot({
     PAA%>%select(STD_DT,TIP,DBC,UUP,TLT,LQD,AGG,IEF,BIL,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,HYG)%>%trans_rt("month")%>%cor%>%round(2)
     
   })
-  output$BAA6 <- renderPlot({
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]%>%melt(id.vars="STD_DT") %>% 
-      ggplot(aes(x=value,fill=variable))+
-      geom_histogram(alpha=0.5, position="identity")+
-      theme(legend.text = element_text(size=15))
+  output$BAA6 <- renderDT({
+    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]%>%filter(STD_DT>"2023-01-01")%>%as.data.frame
   }) 
   output$BAA7<- renderPlot({
     BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]%>%Drawdowns%>%as.xts%>%dt_trans%>%melt(id.vars="STD_DT") %>% 

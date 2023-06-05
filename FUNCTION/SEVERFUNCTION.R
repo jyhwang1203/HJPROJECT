@@ -204,12 +204,12 @@ output$rollcor2 <- renderPlot({
   
 
   tmp  <- RAWDATA%>%select(STD_DT,SP500,USGOVT) %>%trans_rt("week")%>%dt_trans%>%na.omit%>%filter(STD_DT >= input$RI[1] & STD_DT <= input$RI[2])
-  TTMO <- data.table(STD_DT=tmp$STD_DT,ROLLIMG5YEAR = roll_cor(tmp$SP500, tmp$USGOVT, width = 14))%>%left_join(macro%>%select(STD_DT,VIX),by="STD_DT")
+  TTMO <- data.table(STD_DT=tmp$STD_DT,ROLLIMG14week = roll_cor(tmp$SP500, tmp$USGOVT, width = 14))%>%left_join(macro%>%select(STD_DT,VIX),by="STD_DT")
   
-  sec <- with(TTMO, train_sec(ROLLIMG5YEAR, VIX))
-  TTMO%>%select(STD_DT,ROLLIMG5YEAR,VIX)%>%na.omit%>%
+  sec <- with(TTMO, train_sec(ROLLIMG14week, VIX))
+  TTMO%>%select(STD_DT,ROLLIMG14week,VIX)%>%na.omit%>%
     ggplot(aes(STD_DT)) +
-    geom_line(aes(y = ROLLIMG5YEAR), colour = "blue") +
+    geom_line(aes(y = ROLLIMG14week), colour = "blue") +
     geom_line(aes(y = sec$fwd(VIX)), colour = "red") +
     scale_y_continuous(sec.axis = sec_axis(~sec$rev(.), name = "VIX"))
   

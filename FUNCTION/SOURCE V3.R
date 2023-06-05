@@ -51,10 +51,10 @@ ipak(pkg)
       RAWDATA3    <- rbind(RAWDATAFULL,RAWDATA2)
       RAWDATA <- RAWDATA3%>%dcast(STD_DT~variable)
       write.csv(RAWDATA,"c:/work/RAWDATA.csv")
-      # CLI               <-  read.csv("c:/work/CLI.csv",stringsAsFactors = FALSE,header=T,fileEncoding = "UCS-2LE")
-      # CLI  <- dcast(CLI,TIME ~LOCATION,  value.var = "Value")
-      # CLI<- CLI %>% as.data.frame() %>% mutate(STD_DT=paste0(CLI$TIME,"-01") %>%ymd+months(1)-days(1)) %>%       
-      # dplyr::select(STD_DT,USA,KOR) 
+      CLI               <-  read.csv("c:/work/CLI.csv",stringsAsFactors = FALSE,header=T,fileEncoding = "UCS-2LE")
+      CLI  <- dcast(CLI,TIME ~LOCATION,  value.var = "Value")
+      CLI  <- CLI %>% as.data.frame() %>% mutate(STD_DT=paste0(CLI$TIME,"-01") %>%ymd+months(1)-days(1)) %>%
+      dplyr::select(STD_DT,USA,KOR)
       # 
       # 
       # CLI%>%View
@@ -64,7 +64,11 @@ ipak(pkg)
       # 
       # 
       RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
-      mutate(STD_DT=as.Date(STD_DT))%>%mutate(AL=(WREPRA+WRINFRA+HFRI)/3)%>%mutate(KRBONDH=KRBOND/USDKRW)
+      mutate(STD_DT=as.Date(STD_DT))%>%mutate(AL=(WREPRA+WRINFRA+HFRI+PEF)/4)%>%mutate(KRBONDH=KRBOND/USDKRW)%>%
+        mutate(WORLD2 =WORLD*USDKRW)%>%
+        mutate(WRBOND2=WRBOND*USDKRW)%>%
+        mutate(AL2    =AL*USDKRW)%>%
+        mutate(GSCI2  =GSCI*USDKRW)
       #RAWDATA<- BDIND %>% left_join(RAWDATA%>%select(STD_DT,DXY,WORLD), by="STD_DT")
     # HG           <-  readxl::read_excel("c:/work/HEDGEFUND.xlsx",sheet="Sheet2")
     # STD_DT            <-  HG[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
@@ -88,7 +92,7 @@ ipak(pkg)
       macro  <- RAWDATA%>%select(STD_DT,UK10Y,DEM10Y,KR10Y,CN10Y,FR10Y,JP10Y,MOVE,HYSP,VIX)
       eq     <- RAWDATA%>%select(STD_DT,WORLD,DM,EM,DOW,SP500,NASDAQ,KOSPI,EURO50,FTSE,NIKKEI,NIFTY,DAX,CAC,TSX,BVSP,NIFTY,SHANGHAI,CSI300,HANGS,KOSDAQ,
                                USGROWTH,USVALUE,USLVOL,USHDIV,USMOM,USQUAL,KRGROWTH,KRVALUE,MSEX,MSSZ,MSSM,MSBG)
-      fi   <- RAWDATA%>%select(STD_DT,WRBOND,WRGOVT,WRIG,WRHY,USGOVT,USBOND,USIG,USHY,EUBOND,EUIG,EUHY,EUGOVT,KRBOND,EMBOND,CNBOND,USLONG,USSHORT,USMID)
+      fi   <- RAWDATA%>%select(STD_DT,WRBOND,WRGOVT,WRIG,WRHY,USGOVT,USBOND,USIG,USHY,EUBOND,EUIG,EUHY,EUGOVT,KRBOND,EMBOND,EMGOVT,EMGOVTL,CNBOND,USLONG,USSHORT,USMID)
       al   <- RAWDATA%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)
       #style   <- RAWDATA%>%select(STD_DT,WRVALE,WRGROWTH)%>%fillf
       feps <- RAWDATA%>%select(STD_DT,FEPS_WORLD,FEPS_DM,FEPS_EM,FEPS_DOW,FEPS_SP500,FEPS_NASDAQ,FEPS_KOSPI,FEPS_EURO50,FEPS_FTSE,FEPS_NIKKEI,FEPS_NIFTY,FEPS_DAX,
@@ -128,8 +132,8 @@ ipak(pkg)
       
      
 
-      retm <-  RAWDATA %>%trans_rt("month")%>%dt_trans()%>% mutate(AL=1/3*(WRINFRA+WREPRA+CRBTR))%>%mutate(BM=0.6*WORLD+0.4*WRBOND)%>%mutate(MY=3*(0.4*NASDAQ+0.6*USGOVT))%>%
-               mutate(INF=WRGOVT-TIP)%>%mutate(CREDIT=WRIG-WRGOVT)%>%mutate(RINTEREST=TIP)%>%mutate(GROWTH=DM)%>%mutate(FX=USDKRW)%>%mutate(emerging=DM-EM)
+      retm <-  RAWDATA %>%trans_rt("month")%>%dt_trans()%>% mutate(AL=1/3*(WRINFRA+WREPRA+HFRI))%>%mutate(BM=0.6*WORLD+0.4*WRBOND)%>%mutate(MY=3*(0.4*NASDAQ+0.6*USGOVT))%>%
+               mutate(INF=WRGOVT-WRTIP)%>%mutate(CREDIT=WRIG-WRGOVT)%>%mutate(RINTEREST=WRTIP)%>%mutate(GROWTH=DM)%>%mutate(FX=USDKRW)%>%mutate(emerging=DM-EM)
       
       
       
@@ -163,9 +167,9 @@ ipak(pkg)
       
 
       retfi_ytd<- ret_ytd%>%dt_trans%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
-      retfi_yea<- ret_yea%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
-      retfi_mon<- ret_mon%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
-      retfi_wek<- ret_wek%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
+      retfi_yea<- ret_yea%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,EMGOVT,EMGOVTL,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
+      retfi_mon<- ret_mon%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,EMGOVT,EMGOVTL,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
+      retfi_wek<- ret_wek%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,EMGOVT,EMGOVTL,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
       
       retai_ytd<- ret_ytd%>%dt_trans%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()
       retai_yea<- ret_yea%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()

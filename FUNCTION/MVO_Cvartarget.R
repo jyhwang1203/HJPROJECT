@@ -16,15 +16,15 @@ MVO_CVAR  <- function(mu,cov,trate,n,wl,cvar){
   }
   
   hin.objective <- function(w) {
-    h <- numeric(8)
+    h <- numeric(7)
     h[1 ] <- w[1]
     h[2 ] <- w[2]
     h[3 ] <- w[3]
     h[4 ] <- w[4]
     h[5 ] <- w[5]
     h[6 ] <- w[6]
-    h[7 ] <-  -w[3]-w[4] + 0.4
-    h[8] <-   ES(mu%>%as.numeric(), cov, p = 0.05, w = w) - cvar
+    # h[7 ] <-  -w[3]-w[4] + 0.4
+    h[7] <-   ES(mu%>%as.numeric(), cov, p = 0.05, w = w) - cvar
     return( h )
   }
    
