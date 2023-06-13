@@ -1,31 +1,69 @@
-RES1  <-  UNIV %>% left_join(retm%>%select(STD_DT,WORLD,WRBOND))%>%filter(STD_DT>"2022-12-31")
-RES2  <-  RAWDATA %>% select(STD_DT,WORLD,DM,EM,FEPS_DM,FEPS_EM,FPER_DM,FPER_EM)
-RES3  <-  RAWDATA %>%filter(STD_DT>"2010-12-31")%>% select(STD_DT,CNBR,BRBR,KRBR,INBR)
-RES4  <-  CLI
-RES5  <-  retm %>% select(STD_DT,WREPRA,WRINFRA,WORLD,HFRI)%>%na.omit%>%filter(STD_DT>"2010-01-01")%>%cuml
+RES1  <-  RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRBTR,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("week")%>%dt_trans%>%tail(n=1)  %>%exname
+RES2  <-  RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRBTR,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("month")%>%dt_trans%>%tail(n=1)%>%exname
+RES3  <-  RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRBTR,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("year")%>%dt_trans%>%tail(n=1) %>%exname
+RES4  <-  CLI%>%select(STD_DT,USA,KOR)
+RES5  <-  retm%>%filter(STD_DT>"2014-05-30")%>%select(CRB,SIL,WTI,GOLD,COP,WORLD,INF)%>%na.omit%>%cor
 RES6  <-  retm %>% select(STD_DT,EMGOVT,EMGOVTL,EMBOND,WRBOND)%>%na.omit%>%filter(STD_DT>"2010-01-01")%>%cuml
-RES7  <-  RAWDATA %>% select(STD_DT,EMX,EMSP)
+RES7  <-  RAWDATA %>% select(STD_DT,MOVE,EMSP)
 RES8  <-coeff
 #RES4  <-  RAWDATA %>%filter(STD_DT>"2010-12-31")%>% select(STD_DT,CNBR,BRBR,KRBR,INBR)
 
 
-write.xlsx(RES2 ,"c:/work/RES.xlsx", sheetName="FUNDAMENTAL",append=F) 
-write.xlsx(RES3 ,"c:/work/RES.xlsx", sheetName="BRATE",append=T) 
-write.xlsx(RES4 ,"c:/work/RES.xlsx", sheetName="CLI",append=T) 
-write.xlsx(RES5 ,"c:/work/RES.xlsx", sheetName="INFRA",append=T) 
-write.xlsx(RES6 ,"c:/work/RES.xlsx", sheetName="EMBOND",append=T) 
-write.xlsx(RES7 ,"c:/work/RES.xlsx", sheetName="EMSP",append=T) 
-write.xlsx(RES8 ,"c:/work/RES.xlsx", sheetName="DELTA",append=T) 
+write.xlsx(RES1 ,"c:/work/RES.xlsx", sheetName="FUNDAMENTAL",append=F) 
+write.xlsx(RES2 ,"c:/work/RES.xlsx", sheetName="BRATE",append=T) 
+write.xlsx(RES3 ,"c:/work/RES.xlsx", sheetName="CLI",append=T) 
+write.xlsx(RES4 ,"c:/work/RES.xlsx", sheetName="INFRA",append=T) 
+write.xlsx(RES5 ,"c:/work/RES.xlsx", sheetName="EMBOND",append=T) 
+write.xlsx(RES7 ,"c:/work/RES2.xlsx", sheetName="EMSP",append=T) 
+write.xlsx(RES8 ,"c:/work/RES2.xlsx", sheetName="DELTA",append=T) 
 RAWDATA %>% select(STD_DT,SP500,USBR,USBOND)
 
-
-retm %>% select(STD_DT,EMGOVT,EMGOVTL,EMBOND,WRBOND)%>%na.omit%>%filter(STD_DT>"2010-01-01")%>%cuml%>%reshape2::melt(id.vars = "STD_DT")%>%
+RAWDATA%>%select(STD_DT,WTI,CRBTR,COP)%>%filter(STD_DT>"2015-01-01")
+RAWDATA%>%select(STD_DT,WTI,COP)%>%filter(STD_DT>"2021-03-30")%>%trans_rt("week")%>%dt_trans%>%cuml%>%reshape2::melt(id.vars = "STD_DT")%>%
   ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
   geom_line()+
   theme(legend.text = element_text(size=15))
-retm %>% select(STD_DT,WREPRA,WRINFRA,WORLD,HFRI)%>%na.omit%>%filter(STD_DT>"2010-01-01")%>%select(-STD_DT)%>%cor
+  
+graphbar(reteq_wek,"red","Weekly Return")
+g1<- RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRB,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("week")%>%dt_trans%>%tail(n=2) %>%.[1,]%>%graphbar("red","month Return")
+g2<- RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRB,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("month")%>%dt_trans%>%tail(n=2)%>%.[1,]%>%graphbar("red","quarter Return")
+g3<- RAWDATA%>%select(STD_DT,WRINFRA,WREPRA,CRB,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("year")%>%dt_trans%>%tail(n=1) %>%.[1,]%>%graphbar("red","year Return")
+grid.arrange( g1,g2,g3,ncol=3)
 
-RAWDATA %>% select(STD_DT,EMX,EMSP)%>%reshape2::melt(id.vars = "STD_DT")%>%
+RAWDATA%>%filter(STD_DT>"2011-05-30")%>%select(STD_DT,WRINFRA,WREPRA,CRB,PEF,HFRI,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("week")%>%dt_trans%>%tail(n=2)%>%.[1,]%>%graphbar("red","month Return")
+
+retm%>%filter(STD_DT>"2014-05-30")%>%select(CRB,SIL,WTI,GOLD,COP,WORLD,INF)%>%na.omit%>%cor
+retm%>%select(STD_DT,WTI)%>%left_join(CLI%>%select(STD_DT,USA),by="STD_DT")%>%na.omit%>%select(-STD_DT)%>%cor
+temp<- RAWDATA%>%select(STD_DT,CRB,SIL,WTI,GOLD,COP,WORLD,WRBOND)%>%trans_rt("month")%>%data.frame
+
+temp[temp>0,]%>%na.omit%>%cor
+temp[temp<0,]%>%na.omit%>%cor
+
+retm%>%select(STD_DT,WTI)%>%left_join(CLI%>%select(STD_DT,USA),by="STD_DT")%>%na.omit%>%reshape2::melt(id.vars = "STD_DT")%>%
+  ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
+  geom_line()+
+  theme(legend.text = element_text(size=15))
+
+
+
+
+ RAWDATA%>%select(STD_DT,WREPRA,WRINFRA,WORLD)%>%filter(STD_DT>"2021-03-30")%>%trans_rt("week")%>%dt_trans%>%cov
+  
+
+  
+  tmp  <- RAWDATA%>%select(STD_DT,WORLD,WRBOND) %>%trans_rt("week")%>%
+  tmp2 <- data.table(STD_DT=tmp$STD_DT,ROLLIMG14week = roll_cor(tmp$WORLD, tmp$WRBOND, width = 14))
+  
+  tmp3 %>%full_join(tmp2,by="STD_DT")%>%na.omit%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
+    geom_line(size=1)
+
+  retm %>% select(STD_DT,EMGOVT,EMGOVTL)%>%na.omit%>%filter(STD_DT>"2010-01-01")%>%cuml%>%reshape2::melt(id.vars = "STD_DT")%>%
+  ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
+  geom_line()+
+  theme(legend.text = element_text(size=15))
+
+
+RES7 %>%reshape2::melt(id.vars = "STD_DT")%>%
   ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
   geom_line()+
   theme(legend.text = element_text(size=15))

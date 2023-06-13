@@ -72,30 +72,30 @@ MVO <- function(eb=eb,TMP=TMP,lamda=lamda,coeff=coeff,wl=wl,n=n){
   return(res2)
 }
 
-
+s <- which((retm$STD_DT)=="2010-01-31")
 n <-(retm%>%filter(STD_DT>"2010-01-01")%>%nrow-1)
 tmp <- list()
 
   res <- t(sapply(c(1:n),function(t){
-  # t=5
-  STDDT1 <- (("2010-01-01")%>%as.Date()+t*months(1))
+  #t =5
+  STDDT1 <- retm$STD_DT[s+t-1]
 
   # lamda <- 0.99
   TMP  <-  retm %>% filter(STD_DT<STDDT1&STD_DT>STDDT1-years(10))
-  REG1 <-  lm(MSUS ~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+ # REG1 <-  lm(MSUS ~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
   REG1 <-  lm(MSUS ~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
   REG2 <-  lm(EM~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
   REG3 <-  lm(MSKR~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary
   REG4 <-  lm(USGOVT ~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG13 <- lm(USIG~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG5 <-  lm(USHY  ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG6 <-  lm(KRBOND ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG7 <-  lm(EMBOND ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG8 <-  lm(WRINFRA ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG9 <-  lm(WREPRA ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG10 <- lm(HFRI  ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG11 <- lm(WTI ~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
-  REG12 <- lm(GOLD~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG5 <- lm(USIG~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG6 <-  lm(USHY  ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG7 <-  lm(KRBONDH ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG8 <-  lm(EMBOND ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG9 <-  lm(WRINFRA ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG10 <-  lm(WREPRA ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG11 <- lm(HFRI  ~  GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG12 <- lm(WTI ~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
+  REG13 <- lm(GOLD~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP)%>% summary 
   
   coeff <<- rbind(REG1$coefficients[-1,1],
                  REG2$coefficients[-1,1],
@@ -110,16 +110,44 @@ tmp <- list()
                  REG11$coefficients[-1,1],
                  REG12$coefficients[-1,1],
                  REG13$coefficients[-1,1])
+ 
+  # coeff2 <<- rbind(REG1$r.squared,
+  #                 REG2$r.squared,
+  #                 REG3$r.squared,
+  #                 REG4$r.squared,
+  #                 REG5$r.squared,
+  #                 REG6$r.squared,
+  #                 REG7$r.squared,
+  #                 REG8$r.squared,
+  #                 REG9$r.squared,
+  #                 REG10$r.squared,
+  #                 REG11$r.squared,
+  #                 REG12$r.squared,
+  #                 REG13$r.squared)
+  # coeff3 <<- rbind( REG1$adj.r.squared,
+  #                  REG2$adj.r.squared,
+  #                  REG3$adj.r.squared,
+  #                  REG4$adj.r.squared,
+  #                  REG5$adj.r.squared,
+  #                  REG6$adj.r.squared,
+  #                  REG7$adj.r.squared,
+  #                  REG8$adj.r.squared,
+  #                  REG9$adj.r.squared,
+  #                 REG10$adj.r.squared,
+  #                 REG11$adj.r.squared,
+  #                 REG12$adj.r.squared,
+  #                 REG13$adj.r.squared)
+  # 
+  RES <- cbind(coeff,coeff2,coeff3)
   
-  rownames(coeff) <-c("DM","EM","MSKR","USBOND","USHY","KRBOND","EMBOND","WRINFRA","WREPRA","HFRI","WTI","GOLD","USIG")
+  rownames(coeff) <-c("MSUS","EM","MSKR","USGOVT","USIG","USHY","KRBONDH","EMBOND","WRINFRA","WREPRA","HFRI","WTI","GOLD")
   TMP2 <-retm %>% filter(STD_DT<STDDT1&STD_DT>STDDT1-years(10))
   REG1 <- lm(WORLD~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
   REG2 <- lm(MSKR~ GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
   REG3 <- lm(WRBOND~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
-  REG4 <- lm(KRBOND~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
+  REG4 <- lm(KRBONDH~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
   REG5 <- lm(AL~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
   REG6 <- lm(GSCI~GROWTH+INF+CREDIT+RINTEREST+FX,data=TMP2)%>% summary 
-  
   
   fcoeff <- rbind(REG1$coefficients[-1,1],
                   REG2$coefficients[-1,1],
@@ -128,15 +156,16 @@ tmp <- list()
                   REG5$coefficients[-1,1],
                   REG6$coefficients[-1,1]
                   )
-
-  eb <<-(fcoeff[1,]*0.5+ fcoeff[3,]*0.3+ fcoeff[5,]*0.2)
+eb <<-(fcoeff[1,]*0.6+ fcoeff[3,]*0.4)
+#@ eb <<-(fcoeff[1,]*0.5+ fcoeff[3,]*0.3+ fcoeff[5,]*0.2)
   #eb <<-(fcoeff[1,]*0.3+ fcoeff[2,]*0.047+ fcoeff[3,]*0.251+fcoeff[4,]*0.149+fcoeff[5,]*0.223+fcoeff[6,]*0.03)
- # eb <<-(fcoeff[1,]*0.2246+ fcoeff[2,]*0.03+ fcoeff[3,]*0.1+fcoeff[4,]*0.3+fcoeff[5,]*0.3+fcoeff[6,]*0.0454)
+ #eb <<-(fcoeff[1,]*0.2246+ fcoeff[2,]*0.03+ fcoeff[3,]*0.1+fcoeff[4,]*0.3+fcoeff[5,]*0.3+fcoeff[6,]*0.0454)
   n <- coeff %>% nrow
-  wei<- data.frame(as.data.frame(t(MVO(eb,TMP,0.99,coeff,0.03,n))))
+  wei<- data.frame(as.data.frame(t(MVO(eb,TMP,0.99,coeff,0.02,n))))
   tmp$wei <- cbind(STDDT1,wei)
-  colnames(wei) <-c("DM","EM","MSKR","USBOND","USHY","KRBOND","EMBOND","WRINFRA","WREPRA","HFRI","WTI","GOLD","USIG")
-  ret2<- retm%>%filter(STD_DT==(STDDT1-days(1)))%>%melt(id.vars="STD_DT")
+  colnames(wei) <-c("MSUS","EM","MSKR","USGOVT","USIG","USHY","KRBONDH","EMBOND","WRINFRA","WREPRA","HFRI","WTI","GOLD")
+  TMP2 <-retm %>% filter(STD_DT<STDDT1&STD_DT>STDDT1-years(10))
+  ret2<- retm%>%filter(STD_DT==((STDDT1)))%>%melt(id.vars="STD_DT")
   ret3 <- wei%>%melt%>%left_join(ret2,by="variable")
   ret3<- sum(ret3[,2]*ret3[,4])
   tmp$ret <- data.frame(STDDT1,ret3)
@@ -153,12 +182,12 @@ colnames(wei_macro)[-1] <-c("선진국","신흥국","한국주식","미국채권
 FACTOREXP <- do.call(rbind,res[,4])
 RT_MF<- retm%>%select(STD_DT,GROWTH,INF,CREDIT,RINTEREST,FX)%>%cuml
 PA_MF<- retm%>%select(STD_DT,GROWTH,INF,CREDIT,RINTEREST,FX)%>%PA
-ret3 <- RT_MACRO %>%left_join(retm%>%filter(STD_DT>="2010-01-01")%>%select(STD_DT,BM,BM2)%>%mutate(STD_DT=STD_DT+days(1)),by=c("STDDT1"="STD_DT"))
+ret3 <- RT_MACRO %>%left_join(retm%>%filter(STD_DT>="2010-01-01")%>%select(STD_DT,BM,BM2),by=c("STDDT1"="STD_DT"))
 ret3[,-1] <- ret3[,-1]%>%round(4)
-RET_MACRO <- ret3[-1]
+RET_MACRO <- ret3
 #ret3 <- cbind(ret2,retm%>%filter(STD_DT>="2010-01-01")%>%select(STD_DT,WRBOND,WORLD,AL)%>%dt_trans%>%mutate(BM=(0.5*WORLD+0.3*WRBOND+0.2*AL))%>%.[-159,6])
 colnames(RET_MACRO)<- c("STD_DT","MP","BM","BM2")
-RT_MACRO<- data.frame(STD_DT=RET_MACRO$STD_DT,cumprod(1+RET_MACRO[,-1]))
+RT_MACRO <- data.frame(STD_DT=RET_MACRO$STD_DT,cumprod(1+RET_MACRO[,-1]))
 
 
   g1 <- RT_MACRO %>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
@@ -179,7 +208,7 @@ RT_MACRO<- data.frame(STD_DT=RET_MACRO$STD_DT,cumprod(1+RET_MACRO[,-1]))
   
   grid.arrange( g1,g2,ncol=2)
 
-  write.xlsx(RT_MACRO ,  "c:/work/MACROPORT.xlsx", sheetName="RT_MACRO",append=F)
+  write.xlsx(RES ,  "c:/work/MACROPORT.xlsx", sheetName="RT_MACRO",append=F)
   write.xlsx(RET_MACRO , "c:/work/MACROPORT.xlsx", sheetName="RET_MACRO",append=T)
   write.xlsx(pa_macro ,  "c:/work/MACROPORT.xlsx", sheetName="pa_macro",append=T)
   write.xlsx(wei_macro , "c:/work/MACROPORT.xlsx", sheetName="wei_macro",append=T)

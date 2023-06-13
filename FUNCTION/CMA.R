@@ -73,6 +73,7 @@ GDPCPIF          <-  data.frame(STD_DT,TEMP)%>%fillf
       WRGDP24 <- GDPCPIF%>%select(STD_DT,WRGDP24)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
       WRCPI23 <- GDPCPIF%>%select(STD_DT,WRCPI23)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
       WRCPI24 <- GDPCPIF%>%select(STD_DT,WRCPI24)%>%filter(STD_DT==STDDT)%>%select(-STD_DT)
+      #05-31 std_dt
       WRGDP = (2.6 + 2.7)/2
       KRGDP = (1.2 + 2.2)/2
       WRCPI = (5.5 + 3.5)/2

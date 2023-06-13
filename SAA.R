@@ -167,7 +167,7 @@ output$BAA3 <- renderPlot({
   output$VRT2<- renderDT({
     voltarget
   })
-}
+} 
 
 
 shinyApp(ui, server)

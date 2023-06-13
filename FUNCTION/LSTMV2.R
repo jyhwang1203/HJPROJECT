@@ -127,6 +127,8 @@ lstm  <- kt[(nnn)]+cumsum(y_pred)
 
 tmp1  <- (sum((arima - real)^2)/nn)^0.5
 tmp2  <- (sum((lstm - real)^2)/nn)^0.5
+rse
+
 
 mse   <-  rbind(tmp1,tmp2)
 res <- cbind(STD_DT=c(1970:2021),
@@ -160,7 +162,7 @@ TMP$res  <- res
 TMP$res2  <- res2
 # TMP3<- (TMP$res2)%>%as.data.frame
 # colnames(TMP3)[1]<-"STD_DT"
-# TMP3[-c(1:30),]%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
+# TMP3[-c.(1:30),]%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
 #   geom_line()
 
 return(TMP)
@@ -168,35 +170,4 @@ return(TMP)
 TMP <- lstm(5,0.7,150,350,BASEKRM)
 TMP <- lstm(3,0.65,150,350,BASEKRM)
 #TOTAL: - lstm(5,0.75,200,300,BASEKR)
-#FEMALE TMP <- lstm(5,0.65,150,350,BASEKRF)
-  plot(TMP$y_test, type = 'l', col = 'red')
-lines(TMP$y_pred, col = 'blue')
-legend('topright', legend = c('Actual', 'Predicted'), col = c('red', 'blue'), lty = 1)
-
-TMP2<- (TMP$res)%>%as.data.frame
-colnames(TMP2)[1]<-"STD_DT"
-
-g1<-TMP2[]%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
-  geom_line()
--c(1:30)
-
-TMP3<- (TMP$res2)%>%as.data.frame
-colnames(TMP3)[1]<-"STD_DT"
-
-g2 <-TMP3[]%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
-  geom_line()
-
-TMP$mse
-
-grid.arrange(g1,g2, 
-             ncol = 2, nrow = 1)
-g2<- lckt%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
-  geom_line()+ggtitle("KAPPA") +
-  theme(legend.text = element_text(size=15))
-res%>%as.data.frame%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
-  geom_line()
-res2%>%as.data.frame%>%melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +             
-  geom_line()
-(BASEKRM$Dxt/BASEKRM$Ext)%>%.[45,]%>%plot(type="l")
-(BASEKRF$Dxt/BASEKRF$Ext)%>%.[45,]%>%plot(type="l")
-(BASEKR$Dxt/BASEKR$Ext)%>%.[45,]%>%plot(type="l")
+#FEMALE  

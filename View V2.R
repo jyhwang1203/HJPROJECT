@@ -10,11 +10,12 @@ ipak(pkg)
 
 RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
             mutate(STD_DT=as.Date(STD_DT))
-STDDT <- "2023-05-31"%>%as.Date()
+STDDT <- "2023-06-09"%>%as.Date()
 # source("c:/work/SOURCE V3.r")
 # 
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SEVERFUNCTION.r")
 
 EQUITY <- c("글로벌주식"="FEPS_WORLD",
   "선진국주식"          ="FEPS_DM",

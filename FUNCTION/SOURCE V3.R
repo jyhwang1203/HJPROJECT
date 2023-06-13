@@ -10,23 +10,25 @@ pkg <-c("readxl","data.table","dplyr","zoo","writexl","plyr",
  
 ipak(pkg)
 
-      # RAWDATA1           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FI")
-      # RAWDATA2           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="EQ")[,-1]
-      # RAWDATA3           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="AL")[,-1]
-      # RAWDATA4           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FX")[,-1]
-      # RAWDATA5           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FEPS")[,-1]
-      # RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="TPER")[,-1]
-      # RAWDATA7           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RATE")[,-1]
-      # RAWDATA8           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RISK")[,-1]
-      # colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
-      # colnames(RAWDATA6) <- paste0("FPER_",colnames(RAWDATA6))
-      # RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8)
-      # STD_DT            <-  RAWDATA[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
-      # RAWDATA           <-  cbind(STD_DT,RAWDATA[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
-      # TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)%>%fillf
-      # RAWDATAFULL       <-  data.frame(STD_DT,TEMP)%>%mutate(STD_DT=as.Date(STD_DT))%>%melt(id.vars="STD_DT")
-      # 
-      # write.csv(RAWDATAFULL,"c:/work/RAWDATAFULL.csv")
+      RAWDATA1           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FI")
+      RAWDATA2           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="EQ")[,-1]
+      RAWDATA3           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="AL")[,-1]
+      RAWDATA4           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FX")[,-1]
+      RAWDATA5           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="FEPS")[,-1]
+      RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="TPER")[,-1]
+      RAWDATA7           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RATE")[,-1]
+      RAWDATA8           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="RISK")[,-1]
+      RAWDATA9           <-  readxl::read_excel("c:/work/RAWDATA_HI.xlsx",sheet="ETF")[,-1]
+      
+      colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
+      colnames(RAWDATA6) <- paste0("FPER_",colnames(RAWDATA6))
+      RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8,RAWDATA9)
+      STD_DT            <-  RAWDATA[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
+      RAWDATA           <-  cbind(STD_DT,RAWDATA[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
+      TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)%>%fillf
+      RAWDATAFULL       <-  data.frame(STD_DT,TEMP)%>%mutate(STD_DT=as.Date(STD_DT))%>%melt(id.vars="STD_DT")
+
+      write.csv(RAWDATAFULL,"c:/work/RAWDATAFULL.csv")
 
       
       RAWDATA1           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="FI")
@@ -37,13 +39,17 @@ ipak(pkg)
       RAWDATA6           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="TPER")[,-1]
       RAWDATA7           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="RATE")[,-1]
       RAWDATA8           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="RISK")[,-1]
+      RAWDATA9           <-  readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="ETF")[,-1]
+      RAWDATA10           <- readxl::read_excel("c:/work/RAWDATA_ver4.xlsx",sheet="FORECAST")[,-1]
       colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
       colnames(RAWDATA6) <- paste0("FPER_",colnames(RAWDATA6))
-      RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8)
+      RAWDATA<- cbind(RAWDATA1,RAWDATA2,RAWDATA3,RAWDATA4,RAWDATA5,RAWDATA6,RAWDATA7,RAWDATA8,RAWDATA9)
 
       STD_DT            <-  RAWDATA[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
       RAWDATA           <-  cbind(STD_DT,RAWDATA[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
       TEMP              <-  apply(RAWDATA%>%select(-STD_DT), 2, as.numeric)%>%fillf
+      
+      
       RAWDATA2           <-  data.frame(STD_DT,TEMP)%>%mutate(STD_DT=as.Date(STD_DT))%>%melt(id.vars="STD_DT")
 
       RAWDATAFULL<- read.csv("c:/work/RAWDATAFULL.csv")%>%select(-X)%>%
@@ -63,8 +69,9 @@ ipak(pkg)
       # write.csv(CLI,"c:/work/CLI2.csv")
       # 
       # 
+
       RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
-      mutate(STD_DT=as.Date(STD_DT))%>%mutate(AL=(WREPRA+WRINFRA+HFRI+PEF)/4)%>%mutate(KRBONDH=KRBOND/USDKRW)%>%
+      mutate(STD_DT=as.Date(STD_DT))%>%mutate(AL=(WREPRA+WRINFRA+HFRI)/3)%>%mutate(KRBONDH=KRBOND/USDKRW)%>%
         mutate(WORLD2 =WORLD*USDKRW)%>%
         mutate(WRBOND2=WRBOND*USDKRW)%>%
         mutate(AL2    =AL*USDKRW)%>%
@@ -93,7 +100,7 @@ ipak(pkg)
       eq     <- RAWDATA%>%select(STD_DT,WORLD,DM,EM,DOW,SP500,NASDAQ,KOSPI,EURO50,FTSE,NIKKEI,NIFTY,DAX,CAC,TSX,BVSP,NIFTY,SHANGHAI,CSI300,HANGS,KOSDAQ,
                                USGROWTH,USVALUE,USLVOL,USHDIV,USMOM,USQUAL,KRGROWTH,KRVALUE,MSEX,MSSZ,MSSM,MSBG)
       fi   <- RAWDATA%>%select(STD_DT,WRBOND,WRGOVT,WRIG,WRHY,USGOVT,USBOND,USIG,USHY,EUBOND,EUIG,EUHY,EUGOVT,KRBOND,EMBOND,EMGOVT,EMGOVTL,CNBOND,USLONG,USSHORT,USMID)
-      al   <- RAWDATA%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)
+      al   <- RAWDATA%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC,SIL,COP)
       #style   <- RAWDATA%>%select(STD_DT,WRVALE,WRGROWTH)%>%fillf
       feps <- RAWDATA%>%select(STD_DT,FEPS_WORLD,FEPS_DM,FEPS_EM,FEPS_DOW,FEPS_SP500,FEPS_NASDAQ,FEPS_KOSPI,FEPS_EURO50,FEPS_FTSE,FEPS_NIKKEI,FEPS_NIFTY,FEPS_DAX,
                                FEPS_CAC,FEPS_TSX,FEPS_BVSP,FEPS_SHANGHAI,FEPS_CSI300,FEPS_HANGS,
@@ -131,10 +138,10 @@ ipak(pkg)
       ret_ytm<- cbind(eq,fi[,-1],al[,-1],feps[,-1])%>% trans_rt("month")%>%tail(n=1)%>%.[1] %>%round(4)* 100
       
      
-
-      retm <-  RAWDATA %>%trans_rt("month")%>%dt_trans()%>% mutate(AL=1/3*(WRINFRA+WREPRA+HFRI))%>%mutate(BM=0.6*WORLD+0.4*WRBOND)%>%mutate(MY=3*(0.4*NASDAQ+0.6*USGOVT))%>%
-               mutate(INF=WRGOVT-WRTIP)%>%mutate(CREDIT=WRIG-WRGOVT)%>%mutate(RINTEREST=WRTIP)%>%mutate(GROWTH=DM)%>%mutate(FX=USDKRW)%>%mutate(emerging=DM-EM)
-      
+      # RAWDATA <-  RAWDATA %>%filter(STD_DT!="2008-02-29")%>%filter(STD_DT!="2012-02-29")%>%filter(STD_DT!="2016-02-29")%>%filter(STD_DT!="2020-02-29")
+      retm    <-  RAWDATA %>%trans_rt("month")%>%dt_trans()%>% mutate(AL=1/3*(WRINFRA+WREPRA+HFRI))%>%mutate(BM=0.6*WORLD+0.4*WRBOND)%>%mutate(MY=3*(0.4*NASDAQ+0.6*USGOVT))%>%mutate(BM2=0.5*WORLD+0.3*WRBOND+0.2*AL)%>%
+                  mutate(INF=WRGOVT-WRTIP)%>%mutate(CREDIT=WRIG-WRGOVT)%>%mutate(RINTEREST=WRTIP)%>%mutate(GROWTH=DM)%>%mutate(FX=USDKRW)%>%mutate(emerging=DM-EM)
+ 
       
       
       
@@ -171,9 +178,9 @@ ipak(pkg)
       retfi_mon<- ret_mon%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,EMGOVT,EMGOVTL,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
       retfi_wek<- ret_wek%>%select(STD_DT,WRBOND,USBOND,EUBOND,EMBOND,EMGOVT,EMGOVTL,KRBOND,USGOVT,USSHORT,USMID,USLONG,WRIG,USIG,EUIG,WRHY,USHY,EUHY)%>% exname()
       
-      retai_ytd<- ret_ytd%>%dt_trans%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()
-      retai_yea<- ret_yea%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()
-      retai_mon<- ret_mon%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()
-      retai_wek<- ret_wek%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC)%>% exname()
+      retai_ytd<- ret_ytd%>%dt_trans%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC,SIL,COP)%>% exname()
+      retai_yea<- ret_yea%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC,SIL,COP)%>% exname()
+      retai_mon<- ret_mon%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC,SIL,COP)%>% exname()
+      retai_wek<- ret_wek%>%select(STD_DT,PEF,USREIT,EUCREIT,ASIACREIT,USCREIT,WRCINFRA,GSCI,CRBTR,WRINFRA,WREPRA,HFRI,HMACRO,GOLD,WTI,FNG1,ENGM1,BITC,SIL,COP)%>% exname()
     
       

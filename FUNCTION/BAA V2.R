@@ -20,7 +20,7 @@ ipak(pkg)
 # 
 
 #PAA           <-  data.frame(STD_DT,TEMP2)%>%mutate(STD_DT=as.Date(STD_DT))%>%fillf
-PAA           <-  RAWDATA%>%select(STD_DT,TIP,DBC,UUP,TLT,LQD,AGG,IEF,BIL,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,TLT,HYG,LQD)
+PAA           <-  RAWDATA%>%select(STD_DT,TIP,DBC,UUP,LQD,AGG,IEF,BIL,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,TLT,HYG,LQD)
 
 #CANARY <- PAA%>%select(STD_DT,AGG,SPY,VWO,VEA)%>%fillf%>%trans_rt("month")%>%dt_trans()
 CANARY <- retm
@@ -44,51 +44,18 @@ RES <- lapply(c(13:ll),function(T){
   p12<- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-12])%>%.[-1]   
   
    mom<- 12*(p0/p1-1)+4*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
-  
+   #mom<- 6*(p0/p1-1)+3*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
   res<- data.frame(STD_DT,mom)
 return(res)
 })
 
 RES2 <- do.call(rbind,RES)
 RES2[is.na(RES2)] <- 0
-
-
-
-RES <- lapply(c(13:ll),function(T){
+ 
   
-  STD_DT <-DATE[T]
-  p0 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T])%>%.[-1]   
-  p1 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-1]) %>%.[-1]   
-  p3 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-3]) %>%.[-1]   
-  p6 <- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-6]) %>%.[-1]   
-  p12<- RAWDATA%>%select(STD_DT,USBOND,SP500,DM,EM)%>%filter(STD_DT==DATE[T-12])%>%.[-1]   
-  
-  
-  mom<- 6*(p0/p1-1)+3*(p0/p3-1)+2*(p0/p6-1)+(p0/p12-1)
-  res<- data.frame(STD_DT,mom)
-  return(res)
-})
+UNIV <- data.frame(rbind(RES2%>%filter(USBOND<0|SP500<0|DM<0|EM<0)%>%mutate(state=0),
+                         RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0)%>%mutate(state=1)))%>%arrange(STD_DT)
 
-RES2 <- do.call(rbind,RES)
-RES2[is.na(RES2)] <- 0
-
-# RES2 <-RES2 %>% left_join(BASE%>%mutate(STD=BAMLH0A0HYM2-BASE)%>%select(STD_DT,STD),by="STD_DT")
-
-  # UNIV <- data.frame(rbind(RES2%>%filter(USBOND<0|SP500<0|DM<0|EM<0|STD>0)%>%mutate(state=0),
-  # RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0&STD<=0)%>%mutate(state=1)))%>%arrange(STD_DT) 
-  
-  UNIV <- data.frame(rbind(RES2%>%filter(USBOND<0|SP500<0|DM<0|EM<0)%>%mutate(state=0),
-                           RES2%>%filter(USBOND>=0&SP500>=0&DM>=0&EM>=0)%>%mutate(state=1)))%>%arrange(STD_DT) 
-  # TEMP <- (BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT>"2007-01-01")%>%na.omit%>%.[,1])%>%as.data.frame()
-  # n <- nrow(TEMP)
-  # BASE <- lapply(c(1:n),function(t){
-  # data.frame(
-  # STD_DT = TEMP[t,1],
-  # HYSP =  BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT==TEMP[t,1])%>%.[,-1]%>%as.data.frame,
-  # BASE =  BAMLH0A0HYM2%>%dt_trans%>%filter(STD_DT<TEMP[t,1]&STD_DT>(TEMP[t,1]%>%as.Date-years(10)))%>%as.data.frame%>%.[,-1]%>%na.omit%>%mean)
-  # })
-  # 
-  # BASE <- do.call(rbind,BASE)
   
  #수익률이 아니라 가격임
  #sma filter
@@ -96,12 +63,14 @@ RES2[is.na(RES2)] <- 0
   STDDT <- UNIV$STD_DT
   PAA%>%trans_rt("month")%>%cor
   PDEF <- SMA %>%select(STD_DT,TIP,DBC,UUP,TLT,LQD,AGG,IEF,BIL,cash,cash2)%>%as.data.frame%>%fillf
-  #PDEF <-SMA %>%select(STD_DT,TIP,DBC,IEF,TLT,LQD,AGG,BIL,BIL3,BIL2)
+  #PDEF <-SMA %>%select(STD_DT,IEF,UUP,BIL,TIP,BIL2)%>%as.data.frame%>%fillf
   POFF <- SMA %>%select(STD_DT,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,TLT,HYG,LQD)%>%as.data.frame%>%fillf
   #POFF2 <-SMA %>%select(STD_DT,QQQ,VWO,VEA,AGG)
   TEMP <- SMA%>%trans_rt("month")%>%dt_trans()%>%mutate(STD_DT_L1=lag(STD_DT,1))
   l    <- STDDT%>%length
  #안전자산
+  
+
 
   DEF <-lapply(c(1:l),function(t){
 
@@ -127,12 +96,11 @@ RES2[is.na(RES2)] <- 0
                      OFF%>%left_join(UNIV%>%select(STD_DT,state),by="STD_DT")%>%filter(state==1))%>%arrange(STD_DT)
   
   colnames(UNIV_BAA) <- c("STD_DT","variable","sma","state")
-  
+ 
   
   ##input
   STDDT <- "2007-01-01"%>%as.Date()
-  
-  n <-6
+
 
   BAA <- function(date,date2,state,n,nn,univ){
     
@@ -147,7 +115,7 @@ RES2[is.na(RES2)] <- 0
     STDDT2 <- date2%>%as.Date()
     # STDDT <- "2012-06-30"%>%as.Date()
     # STDDT2 <- "2022-06-30"%>%as.Date()
-    # 
+
     
     {if(state=="G12"){
         RET_OFF <- UNIV_BAA%>%filter(state==1)%>%group_by(STD_DT)%>%dplyr::arrange(sma,decreasing=F,.by_group=TRUE)%>%group_by(STD_DT)%>%dplyr::mutate(rank=order(sma,decreasing=T)) %>%
@@ -181,7 +149,8 @@ RES2[is.na(RES2)] <- 0
 return(RT)
   }
  #  res  <- BAA("2008-01-01","2023-06-30","G12",n=12,nn=2,"UUP")%>%cuml
- BAA("2012-06-30","2023-06-30","G12",n=12,nn=2,"UUPX")%>%cuml
+
+  BAA("2008-01-01","2023-06-30","G12",n=12,nn=3,"UUP")%>%cuml
 # RES1  <-   UNIV%>%filter(STD_DT>"2022-12-31")
 # write.xlsx(RT_BAA ,"c:/work/BAA.xlsx", sheetName="RT_BAA",append=F)  
 #   UNIV%>%select(-state)%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +
