@@ -10,15 +10,15 @@ ipak(pkg)
 
 RAWDATA <-  read.csv("c:/work/RAWDATA.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%
   mutate(STD_DT=as.Date(STD_DT))
-STDDT <- "2023-05-31"%>%as.Date()
+STDDT <- "2023-06-15"%>%as.Date()
 
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/Quant UDF.r")
-source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
+#source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/SOURCE V3.r")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/CMA.R")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/MVO_TARGETRT.R")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/MVO_Voltarget.R")
 source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/BAA V2.R")
-
+source("c:/Users/ghkdw/OneDrive/문서/GitHub/HJPROJECT/FUNCTION/HAA.R")
 
 
 
@@ -39,14 +39,11 @@ ui <-
                                                             c("BAA"="BAA",
                                                               "60/40"="BM",
                                                               "50/30/20"="BM2",
-                                                              "글로벌주식"="WORLD")),
-                                         checkboxGroupInput("univ", "Variables to show:",
-                                                            c("달러미포함"="UUPX",
-                                                              "달러포함"="UUPO"))
+                                                              "글로벌주식"="WORLD"))
                         ),
                                     
-                        dashboardBody( fluidRow(box(plotOutput("BAA3"), width =6),box(plotOutput("BAA9"), width =6)),
-                                       fluidRow(box(DTOutput("BAA1"), width =4),box(DTOutput("BAA8"), width =4),box(DTOutput("BAA6"), width =4)),
+                        dashboardBody( fluidRow(box(plotOutput("BAA3"), width =8),box(DTOutput("BAA1"), width =4)),
+                                       fluidRow(box(DTOutput("BAA9"), width =4),box(DTOutput("BAA8"), width =4),box(DTOutput("BAA6"), width =4)),
                                        fluidRow(box(plotOutput("BAA4"), width =6),box(plotOutput("BAA7"), width =6)),
                                        fluidRow(box(plotOutput("BAA10"), width =12))
                                      )
@@ -88,38 +85,37 @@ ui <-
   
 
 server <- function(input, output){
-####baa
-  output$BAA1 <- renderDT({
-  BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>% PA  
 
-    
+  output$BAA1 <- renderDT({
+  BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%select(STD_DT,BAA)%>%left_join(
+    HAA(input$dateRange[1],input$dateRange[2],4,1,UNIV_HAA)%>%select(STD_DT,HAA,BM,WORLD),by="STD_DT")%>%PA
   })
   output$BAA2 <- renderDT({
     MYFUN <- function(data){(prod(1+data)-1)%>%round(4)}
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%mutate(STD_DT=substr(STD_DT,1,4))%>%aggregate(cbind(BAA,WORLD,BM)~STD_DT,.,FUN=MYFUN)
+    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%select(STD_DT,BAA)%>%left_join(
+      HAA(input$dateRange[1],input$dateRange[2],4,1,UNIV_HAA)%>%select(STD_DT,HAA,BM,WORLD),by="STD_DT")%>%aggregate(cbind(BAA,WORLD,BM)~STD_DT,.,FUN=MYFUN)
  })
 
-output$BAA3 <- renderPlot({
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%cuml%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +
-      geom_line(size=1)+
-      ggtitle("누적수익률") +
-      theme(legend.text = element_text(size=15))
+  output$BAA3 <- renderPlot({
+  BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%select(STD_DT,BAA)%>%left_join(
+    HAA(input$dateRange[1],input$dateRange[2],4,1,UNIV_HAA)%>%select(STD_DT,HAA,BM,WORLD),by="STD_DT")%>%cuml%>% cplot
   })
+  
   output$BAA4 <- renderPlot({
-    UNIV%>%select(STD_DT,state)%>%ggplot(aes(STD_DT, state)) +
-      geom_line(size=1)+
-      ggtitle("카나리아자산") +
-      theme(legend.text = element_text(size=15))
+    UNIV_HAA0%>%select(STD_DT,state)%>%rename(c("state"="HAA"))%>%left_join(UNIV_BAA0%>%select(STD_DT,state)%>%rename(c("state"="BAA")),by="STD_DT")%>%cplot
   })
   output$BAA5 <- renderDT({
     PAA%>%select(STD_DT,TIP,DBC,UUP,TLT,LQD,AGG,IEF,BIL,SPY,QQQ,IWM,VGK,EWJ,VNQ,VWO,GLD,DBC,HYG)%>%trans_rt("month")%>%cor%>%round(2)
     
   })
   output$BAA6 <- renderDT({
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]%>%filter(STD_DT>"2023-01-01")%>%as.data.frame
-  }) 
+    #BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%.[,c("STD_DT","BAA",input$strategy)]%>%filter(STD_DT>"2023-01-01")%>%as.data.frame
+    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%select(STD_DT,BAA)%>%left_join(
+      HAA(input$dateRange[1],input$dateRange[2],4,1,UNIV_HAA)%>%select(STD_DT,HAA,BM,WORLD),by="STD_DT") %>%filter(STD_DT>"2023-01-01")%>%as.data.frame 
+    }) 
   output$BAA7<- renderPlot({
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]%>%Drawdowns%>%as.xts%>%dt_trans%>%melt(id.vars="STD_DT") %>% 
+    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%select(STD_DT,BAA)%>%left_join(
+      HAA(input$dateRange[1],input$dateRange[2],4,1,UNIV_HAA)%>%select(STD_DT,HAA,BM,WORLD),by="STD_DT")%>%Drawdowns%>%as.xts%>%dt_trans%>%melt(id.vars="STD_DT") %>% 
       ggplot(aes(STD_DT, value, col = variable)) +             
       geom_line(size=1)+ 
       ggtitle("Maximal Drawdown") +
@@ -127,18 +123,22 @@ output$BAA3 <- renderPlot({
     
   })
   output$BAA8<- renderDT({
-    STDDT<- input$port
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%.[,c("STD_DT","BAA",input$strategy)]
-    UNIV_BAA2%>%filter(substr(STD_DT,1,7)==substr(STDDT,1,7))%>%mutate(sma=sma%>%round(3))%>%mutate(Return=Return%>%round(3))
+    UNIV_BAA2%>%mutate(sma=sma%>%round(3))%>%mutate(Return=Return%>%round(3)) %>% select(STD_DT,sma,variable,Return)%>%filter(substr(STD_DT,1,7)==substr(input$port,1,7))
+    
+      
+    })
+
+  output$BAA9<- renderDT({
+    UNIV_HAA2%>%mutate(sma=sma%>%round(3))%>%mutate(Return=Return%>%round(3)) %>% select(STD_DT,sma,variable,Return)%>%filter(substr(STD_DT,1,7)==substr(input$port,1,7))
   })
-  output$BAA9 <- renderPlot({
-    MYFUN <- function(data){(prod(1+data)-1)%>%round(4)}
-    BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,input$univ)%>%mutate(STD_DT=substr(STD_DT,1,4))%>%aggregate(cbind(BAA,WORLD,BM)~STD_DT,.,FUN=MYFUN)%>%
-      melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, fill = variable)) +  
-      geom_bar(position="dodge", stat="identity")+
-      theme(legend.text = element_text(size=15))+
-      ggtitle("연간수익률")
-  })
+  # output$BAA9 <- renderPlot({
+  #   MYFUN <- function(data){(prod(1+data)-1)%>%round(4)}
+  #   BAA(input$dateRange[1],input$dateRange[2],input$state,input$noff,input$ndef,UNIV_BAA)%>%mutate(STD_DT=substr(STD_DT,1,4))%>%aggregate(cbind(BAA,WORLD,BM)~STD_DT,.,FUN=MYFUN)%>%
+  #     melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, fill = variable)) +  
+  #     geom_bar(position="dodge", stat="identity")+
+  #     theme(legend.text = element_text(size=15))+
+  #     ggtitle("연간수익률")
+  # })
   output$BAA10 <- renderPlot({
     UNIV%>%select(-state)%>% melt(id.vars="STD_DT")%>%ggplot(aes(STD_DT, value, col = variable)) +
       geom_line(size=1)+

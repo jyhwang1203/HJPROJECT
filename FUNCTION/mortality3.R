@@ -18,7 +18,7 @@ lifetable[,1] <- gsub('.{1}$', '', lifetable[,1])
 lifetable <- lifetable[lifetable[,1]!="100세이",]
 colnames(lifetable)[-c(1,2)] <- lifetable%>%colnames%>%.[-c(1,2)] %>% substr(2,5)
 ncol(lifetable)
-lifetable <-lifetable[,-c((ncol(lifetable)-12):ncol(lifetable))]
+lifetable <-lifetable[,-c((ncol(lifetable)-14):ncol(lifetable))]
 #lifetable<-lifetable[,-c((ncol(lifetable)-5):ncol(lifetable))]
 #lifetable <-lifetable[,-c(3:12)]
 
@@ -58,7 +58,7 @@ BASEKRF <- StMoMoData(BASEH, series = "female")
 # LCfit <-  StMoMo::fit(LC, data = BASEKR)
 # LCfitm <-  StMoMo::fit(LC, data = BASEKRM)
 # LCfitf <-  StMoMo::fit(LC, data = BASEKRF)
-lifetable <-lifetable[,-c((ncol(lifetable)-1):ncol(lifetable))]
+
 ###################################
 df <- list()
 df$dead  <- lifetable %>% filter(index=="dea_t")%>%.[,-c(1,2)] %>%as.matrix

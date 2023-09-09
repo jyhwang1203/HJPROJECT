@@ -144,7 +144,7 @@ server <- function(input, output){
 
 ###########risk###########################################
 output$USSP<- renderPlot({
-  RAWDATA%>%select(STD_DT,US30Y,US2Y,USBR)%>%filter(STD_DT >= input$RI[1] & STD_DT <= input$RI[2])%>%reshape2::melt(id.vars="STD_DT")%>%na.omit%>%ggplot(aes(x=STD_DT, y=value, group = variable))+ 
+  RAWDATA%>%select(STD_DT,US30Y,US2Y,USBR)%>%filter2(STD_DT >= input$RI[1] & STD_DT <= input$RI[2])%>%reshape2::melt(id.vars="STD_DT")%>%na.omit%>%ggplot(aes(x=STD_DT, y=value, group = variable))+ 
     geom_line(alpha = 1, aes(col=(variable))) 
 })
 output$KRSP<- renderPlot({

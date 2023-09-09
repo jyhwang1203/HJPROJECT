@@ -14,21 +14,21 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
     sum <- numeric(2)
     sum[1] = sum(w)-1
     #sum[2 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
-    sum[2] = t(w) %*%t(mu) - trate
+  sum[2] = t(w) %*%t(mu) - trate
     return( sum )
   }
   
   hin.objective <- function(w) {
-    h <- numeric(7)
+    h <- numeric(8)
     h[1 ] <- w[1]
     h[2 ] <- w[2]
     h[3 ] <- w[3]
     h[4 ] <- w[4]
     h[5 ] <- w[5]
     h[6 ] <- w[6]
-    h[7 ] <- -w[3]-w[4] + 0.4
- #  h[7 ] <- -((t(w) %*% cov %*% w))^0.5 + vol
-  #  h[7 ] <- t(w) %*% t(mu) - trate
+    h[7 ] <- w[3]+w[4] - 0.4
+    h[8] <- -((t(w) %*% cov %*% w))^0.5 + vol
+   #h[9 ] <- t(w) %*% t(mu) - trate
     return( h )
   }
   
@@ -50,14 +50,21 @@ MVO_TARGETRT <- function(mu,cov,trate,n,wl,vol){
 } 
 
 
-trate <- (WRGDP+WRCPI+KRGDP+KRCPI)/200
 
-wei1<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.16)%>%as.matrix()
-wei2<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.14)%>%as.matrix()
-wei3<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.12)%>%as.matrix()
-wei4<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.10)%>%as.matrix()
-wei5<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.08)%>%as.matrix()
-wei6<- MVO_TARGETRT(mu24,12*cov24,trate=trate,n=6,wl=0.03,0.06)%>%as.matrix()
+#trate <- (WRGDP+WRCPI+KRGDP+KRCPI)/200
+trate <- 0.063
+mu <- mu2308%>%t
+mu2307<- mu24[,6]
+mu2308<- mu24[,7]
+
+MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.12)
+MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.12)%>%as.matrix()%>%sum
+wei1<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.16)%>%as.matrix()
+wei2<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.14)%>%as.matrix()
+wei3<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.12)%>%as.matrix()
+wei4<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.10)%>%as.matrix()
+wei5<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.08)%>%as.matrix()
+wei6<- MVO_TARGETRT(mu,12*cov24,trate=trate,n=6,wl=0.03,0.06)%>%as.matrix()
 
 wei1%>%as.data.frame()%>% reshape2::melt()%>% ggplot(aes(variable, value,col=variable,fill=variable))+geom_bar(stat = "identity")+ ggtitle(paste0("최소자산비중=",wl2,"목표수익률=",0.065)) 
 
@@ -70,12 +77,12 @@ G6TRT <- wei6%>%as.data.frame()%>% melt()%>% ggplot(aes(variable, value,col=vari
 GR_TARGETRT<- grid.arrange(G1TRT,G2TRT,G3TRT,G4TRT,G5TRT,ncol=5)
 
 temp <- rbind(
-  c((wei1) %*% t(mu24), ((wei1) %*%(12*cov24)%*% t(wei1))^0.5),
-  c((wei2) %*% t(mu24), ((wei2) %*%(12*cov24)%*% t(wei2))^0.5),
-  c((wei3) %*% t(mu24), ((wei3) %*%(12*cov24)%*% t(wei3))^0.5),
-  c((wei4) %*% t(mu24), ((wei4) %*%(12*cov24)%*% t(wei4))^0.5),
-  c((wei5) %*% t(mu24), ((wei5) %*%(12*cov24)%*% t(wei5))^0.5),
-  c((wei6) %*% t(mu24), ((wei6) %*%(12*cov24)%*% t(wei6))^0.5))%>%data.frame
+  c((wei1) %*% t(mu), ((wei1) %*%(12*cov24)%*% t(wei1))^0.5),
+  c((wei2) %*% t(mu), ((wei2) %*%(12*cov24)%*% t(wei2))^0.5),
+  c((wei3) %*% t(mu), ((wei3) %*%(12*cov24)%*% t(wei3))^0.5),
+  c((wei4) %*% t(mu), ((wei4) %*%(12*cov24)%*% t(wei4))^0.5),
+  c((wei5) %*% t(mu), ((wei5) %*%(12*cov24)%*% t(wei5))^0.5),
+  c((wei6) %*% t(mu), ((wei6) %*%(12*cov24)%*% t(wei6))^0.5))%>%data.frame
 
 colnames(temp) <- c("mean","vol")
 temp <-temp %>% mutate(SR=(mean)/vol)%>%round(4)
@@ -91,7 +98,9 @@ targetrt <-  cbind(
   wei5%>%data.frame,
   wei6%>%data.frame))%>%as.data.frame()
 targetrt
-# 
+(cov24%>%diag*12)^0.5
+cov24
+mu# 
 # write.xlsx(targetrt ,"c:/work/MP.xlsx", sheetName="targetrt",append=F)
 # write.xlsx(targetrt2 ,"c:/work/MP.xlsx", sheetName="targetrt2",append=T)
 # write.xlsx(voltarget ,"c:/work/MP.xlsx", sheetName="voltarget",append=T)

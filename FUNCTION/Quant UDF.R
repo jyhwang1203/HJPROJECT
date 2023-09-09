@@ -5,32 +5,50 @@ ipak <- function(pkg){
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 } 
-pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape")
+pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape","imager","png","grid")
 ipak(pkg)
   
+
+handling <- function(data){
+  STD_DT            <-  data[-c(1:9),1]%>%as.matrix()%>%as.numeric%>%as.Date(origin = "1899-12-30")
+  RAWDATA           <-  cbind(STD_DT,data[-c(1:9),-1]) %>%as.data.frame(stringsasfactors = T)%>% as.data.table()
+  TEMP              <-  apply(RAWDATA%>%dplyr::select(-STD_DT), 2, as.numeric)%>%fillf
+  RAWDATA2           <-  data.frame(STD_DT,TEMP)%>%mutate(STD_DT=as.Date(STD_DT))
+  #%>%melt(id.vars="STD_DT")
+  return(RAWDATA2)
+}
+
+
+
 dt_trans<- function(data){
   
   data <- data.table(STD_DT=index(data),data)
-  
+    
   return(data)
+}
+
+cplot <- function(data){
+  data%>%reshape2::melt(id.vars = "STD_DT")%>%na.omit%>%
+    ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
+    geom_line(size=1)
 }
 
 trans_rt <- function(data,st){
   data <- data%>%data.frame()
   {if(st=="day"){
-    data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log"))
+    data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log"))%>%na.omit
   }
     else if(st=="week"){
-      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.weekly(., Return.cumulative)
+      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.weekly(., Return.cumulative)%>%na.omit
     }
     else if(st=="month"){
-      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.monthly(., Return.cumulative)
+      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
     }
     else if(st=="quarter"){
-      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.quarterly(., Return.cumulative)
+      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.quarterly(., Return.cumulative)%>%na.omit
     }
     else if(st=="year"){
-      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.yearly(., Return.cumulative)
+      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.yearly(., Return.cumulative)%>%na.omit
     }
   }
   return(data)
@@ -71,8 +89,8 @@ tb_per <-  function(data){
 
 cuml <-  function(data){
   
-  return(data.table(STD_DT=data$STD_DT,(1+data%>%select(-STD_DT))%>%cumprod) )
-  
+#  return(data.table(STD_DT=data$STD_DT,100*((1+data%>%dplyr::select(-STD_DT))%>%cumprod)-1)-100 )
+  return(data.table(STD_DT=data$STD_DT,((1+data%>%dplyr::select(-STD_DT))%>%cumprod)-1))
 }
 
      graphbar <- function(data,col,title){
@@ -82,7 +100,28 @@ cuml <-  function(data){
        
        return(RES)
      }
+     
+     graphbar2 <- function(data,title){
 
+       # 
+       # RES <- RAWDATA%>%filter(variable=="SP500"|variable=="USGOVT")%>%dcast(STD_DT~variable)%>%filter(STD_DT<"1990-01-01")%>%mutate(BM=0.6*SP500+0.4*USGOVT)%>%
+       #   mutate(USGOVT=USGOVT)%>%mutate(SP500=SP500)%>%trans_rt("year")%>%dt_trans%>%melt(id.vars="STD_DT")  %>%   ggplot( aes(x=STD_DT, y=value, fill=variable)) +
+       #   geom_bar(stat="identity", position=position_dodge())
+       # 
+       
+       
+       RES <- data%>% melt(id.vars="STD_DT")  %>%   ggplot(aes(x=STD_DT, y=value,fill=variable)) +  
+         geom_bar(stat="identity",position=position_dodge()) + theme(axis.text.x = element_text(angle = 90, hjust = 1,size=20))+ 
+         ggtitle(paste("'",title,"'")) 
+       
+       return(RES)
+     }
+     
+     png("filename.png")
+     plot(1:10)
+     dev.off()
+     
+     
      exname <- function(data){
        
        data%>%reshape::rename(c("WORLD"="글로벌주식",
@@ -198,9 +237,24 @@ cuml <-  function(data){
                       "FNG1"="미국천연가스",
                       "ENGM1"="유럽천연가스",
                       "BITC"="비트코인",
-                      "MSKR"="한국주식"
-                                            )                    
-                           )
+                      "MSKR"="한국주식",
+                      "SIL"="은",
+                      "COP"="구리",
+                      "ISMPMIM"="ISM제조업지수",
+                      "ISMPMIS"="ISM비제조업지수",
+                      "USCPIYOY"="미국CPI(YoY)",
+                      "USCORECPIYOY"="미국CoreCPI(YoY)",
+                      "USBR"="미국기준금리",
+                      "KRBR"="한국기준금리",
+                      "CNBR"="중국기준금리",
+                      "EUBR"="유로기준금리",
+                      "JPBR"="일본기준금리",
+                      "UKBR"="영국기준금리",
+                      "AUBR"="호주기준금리",
+                      "BRBR"="브라질기준금리",
+                      "INBR"="인도기준금리",
+                      "UKCPI"="영국CPI(YoY)"
+                           ))
      }
      
      
@@ -243,6 +297,7 @@ cuml <-  function(data){
        
        
        PA  <- function(data){
+       
          TMP    <- data.frame(STD_DT=data$STD_DT,cumprod(1+data[,-1]))
          mean   <- (TMP[,-1]%>%tail(n=1))^(12/data%>%nrow) -1
          sig    <- ((data[,-1])%>%apply(2,var) * 12)^0.5
@@ -262,3 +317,4 @@ cuml <-  function(data){
          return(tmp)
        }
 
+       RAWDATA%>%filter(variable=="OILINV")%>%dcast(STD_DT~variable) 

@@ -5,8 +5,9 @@
 
 
 llmodel <- function(data,data2){
-  
-  data <- data$Dxt/data$Ext
+  # data  <-  BASEKRF
+  # data2 <-  BASEKR
+  data <-  data$Dxt/data$Ext
   # q
   # t<-0
   b<- array(1:1, dim=c(nrow(data),1))
