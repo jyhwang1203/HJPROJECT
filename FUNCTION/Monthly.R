@@ -31,7 +31,7 @@ QTMP<- RAWDATA%>%filter(variable=="OILINV")%>%dcast(STD_DT~variable) %>%
 RAWDATA%>%filter(variable=="OILINV")%>%dcast(STD_DT~variable) %>%
   mutate(rolling_avg = rollmean(OILINV, k=26, fill=NA, align='right'))%>%cplot
 
-#주식, 채권 벡테스트트
+#주식, 채권 벡테스트
 ui <-  navbarPage("Dashboard", theme = shinytheme("flatly"),
                   tabPanel("기준금리",
                            dashboardPage(dashboardHeader(),
