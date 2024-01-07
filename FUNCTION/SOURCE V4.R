@@ -7,7 +7,7 @@ ipak <- function(pkg){
 } 
 pkg <-c("readxl","data.table","dplyr","zoo","writexl","plyr","openxlsx","DT",
         "lubridate","xlsx","gridExtra","quantmod","reshape","reshape2","depmixS4",
-        "shiny","shinythemes", "shinydashboard","ggplot2","quantmod","dynlm")
+        "shiny","shinythemes", "shinydashboard","ggplot2","quantmod","dynlm","vars","bvartools")
  
 ipak(pkg)
 

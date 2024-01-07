@@ -5,7 +5,7 @@ ipak<- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 } 
 
-pkg <-c("demography","reshape2","dplyr","reshape2","plyr",
+pkg <-c("demography","reshape2","dplyr","reshape2","plyr","MortCast"
         "nloptr","tseries","urca",'zoo','StMoMo',"TSA","ggplot2","xlsx","gridExtra")
 ipak(pkg)
 ###한국(종합)
