@@ -440,20 +440,17 @@ server <- function(input, output)
   
 }
 shinyApp(ui, server)
-bond_wek %>%dcast(STD_DT~variable)%>%trans_rt("week")
-
+# RAWDATA%>%filter(variable=="DOW")%>%dcast(STD_DT~variable)
+stock_wek%>%filter(variable=="EM")%>%dcast(STD_DT~variable)
 stock_wek <- RAWDATA%>%filter(variable=="WORLD"|variable=="DOW"|variable=="NASDAQ"|variable=="MSEU"|variable=="MSUK"|variable=="MEDE"|variable=="MEFR"|variable=="MSIN"|variable=="MSBR"|
-                                variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="KOSDAQ"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="JEPI.Adjusted")
+                                variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="DM"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="EM")
 
 stock_mon <- RAWDATA%>%filter(variable=="WORLD"|variable=="DOW"|variable=="NASDAQ"|variable=="MSEU"|variable=="MSUK"|variable=="MEDE"|variable=="MEFR"|variable=="MSIN"|variable=="MSBR"|
-                              variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="KOSDAQ"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="JEPI.Adjusted")
+                              variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="DM"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="EM")
 
 stock_ytd <- RAWDATA%>%filter(variable=="WORLD"|variable=="DOW"|variable=="NASDAQ"|variable=="MSEU"|variable=="MSUK"|variable=="MEDE"|variable=="MEFR"|variable=="MSIN"|variable=="MSBR"|
-                              variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="KOSDAQ"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="JEPI.Adjusted")
+                              variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="DM"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="EM")
 
-             grid.arrange(graphbar(stock_mon,"steelblue","주식MON"),graphbar(stock_ytd,"steelblue","주식YTD"),ncol=2)
-             write.xlsx(stock_mon ,"c:/work/monthly.xlsx", sheetName="stock_mon",append=T)
-             write.xlsx(stock_ytd ,"c:/work/monthly.xlsx", sheetName="stock_ytd",append=T)
 #주식시장 정리
             
 FEPS_mon <- RAWDATA%>%filter(variable=="FEPS_WORLD"|variable=="FEPS_DOW"|variable=="FEPS_NASDAQ"|variable=="FEPS_MSEU"|variable=="FEPS_MSUK"|variable=="FEPS_MEDE"|variable=="FEPS_MEFR"|variable=="FEPS_MSIN"|variable=="FEPS_MSBR"|
@@ -509,4 +506,5 @@ al_ytd   <- RAWDATA%>%filter(variable=="PEF"|variable=="USREIT"|variable=="WRREI
 #외환
             RAWDATA%>%filter(variable=="DXY"|variable=="USDKRW"|variable=="EURO"|variable=="CNH"|variable=="EMX"|variable=="GBP"|variable=="YEN")%>%
             dcast(STD_DT~variable)%>%filter(STD_DT=="2023-08-01")
+            
             
