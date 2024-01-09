@@ -52,7 +52,7 @@ MUH =matrix(df_f$dead/df_f$exp,nL,nC)
 POPH=matrix(df_f$exp,nL,nC)
 BASEH <- demogdata(data=MUH, pop=POPH, ages=AGE, years=YEAR, type="mortality",
                    label="korea", name="female", lambda=0)
-BASEKRF <- StMoMoData(BASEH, series = "female") 
+BASEKRF2 <- StMoMoData(BASEH, series = "female") 
 
 # LC <- lc(link = "logit")
 # LCfit <-  StMoMo::fit(LC, data = BASEKR)
@@ -74,7 +74,7 @@ MUH =matrix(df$dead/df$exp,nL,nC)
 POPH=matrix(df$exp,nL,nC)
 BASEH <- demogdata(data=MUH, pop=POPH, ages=AGE, years=YEAR, type="mortality",
                    label="korea", name="total", lambda=0)
-BASEKR <- StMoMoData(BASEH, series = "total") 
+BASEKR2 <- StMoMoData(BASEH, series = "total") 
 
 ###한국(남성)
 
@@ -92,7 +92,7 @@ MUH =matrix(df_m$dead/df_m$exp,nL,nC)
 POPH=matrix(df_m$exp,nL,nC)
 BASEH <- demogdata(data=MUH, pop=POPH, ages=AGE, years=YEAR, type="mortality",
                    label="korea", name="male", lambda=0)
-BASEKRM <- StMoMoData(BASEH, series = "male") 
+BASEKRM2 <- StMoMoData(BASEH, series = "male") 
 
 
 

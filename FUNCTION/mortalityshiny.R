@@ -5,14 +5,14 @@ data3 <- LCfitf$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
 data.frame(STD_DT=c(1970:2021), TOTAL=cusum(data1),MALE=cusum(data2),FEMALE=cusum(data3))
 data.frame(STD_DT=c(1970:2071), TOTAL=c(LCfit$kt,LCfor$kt.f$mean),MALE=c(LCfitm$kt,LCform$kt.f$mean),FEMALE=c(LCfitf$kt,LCforf$kt.f$mean))%>%cplot
 
-TMP <- TXT %>% melt %>% left_join(MXT %>% melt,by=c("X1","X2"))%>% left_join(FXT %>% melt,by=c("X1","X2"))
+#TMP <- TXT %>% melt %>% left_join(MXT %>% melt,by=c("X1","X2"))%>% left_join(FXT %>% melt,by=c("X1","X2"))
 
 TMP <- TXT %>% melt %>% left_join(RTXT %>% melt,by=c("X1","X2"))
 TMP <- MXT %>% melt %>% left_join(RMXT %>% melt,by=c("X1","X2"))
 TMP <- FXT %>% melt %>% left_join(RFXT %>% melt,by=c("X1","X2"))
 
 TMP <-  RTXT %>% melt %>% left_join(RFXT %>% melt,by=c("X1","X2"))%>% left_join(RMXT %>% melt,by=c("X1","X2"))
-TMP %>% dplyr::filter(X1=="60")%>%.[,-1]%>%rename(c(X2="STD_DT"))%>%cplot
+
 
 mxm <- BASEKRM$Dxt/BASEKRM$Ext
 mxf <- BASEKRF$Dxt/BASEKRF$Ext
@@ -21,7 +21,7 @@ mxf_llg <- exp(LCfitf$bx%>%as.matrix()%*%kappa_fv$`Li-LEE-FEMALE`+matrix(data = 
 mxm_ll  <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$`LC-MALE`+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
 mxf_ll  <- exp(LCfitf$bx%>%as.matrix()%*%kappa_fv$`LC-FEMALE`+matrix(data = (LCfitf$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
 
-cbind(STD_DT=c(2012:2021),mxm[45,c(2012:2021)%>%as.character()],mxm_ll[45,],mxm_llg[45,])%>%as.data.frame%>%cplot
+
 
     ui <- navbarPage("LI-LEE류",theme = shinytheme("flatly"),
        tabPanel("기대여명",dashboardPage(dashboardHeader(),
@@ -89,7 +89,3 @@ cbind(STD_DT=c(2012:2021),mxm[45,c(2012:2021)%>%as.character()],mxm_ll[45,],mxm_
         }
 
 shinyApp(ui, server)
-
-    KT%>%reshape2::melt(id.vars = "STD_DT")%>%na.omit%>%
-  ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
-  geom_line(size=1)

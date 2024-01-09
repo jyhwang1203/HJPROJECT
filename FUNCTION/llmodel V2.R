@@ -177,16 +177,48 @@ LCform$kt.f$mean
    tmp6 <- cbind(LCfit2$bx,LCfitm2$bx,LCfitf2$bx)
    
    #REAL
-   mxf <- BASEKRM$Dxt/BASEKRM$Ext
+   mxm <- BASEKRM$Dxt/BASEKRM$Ext
    mxf <- BASEKRF$Dxt/BASEKRF$Ext
-   mxf_llg   <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$`Li-LEE-MALE`+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
+   mxm_llg   <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$`Li-LEE-MALE`+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
    mxf_llg   <- exp(LCfitf$bx%>%as.matrix()%*%kappa_fv$`Li-LEE-FEMALE`+matrix(data = (LCfitf$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
-   mxf_lc    <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$`LC-MALE`+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
+   mxm_lc    <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$`LC-MALE`+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
    mxf_lc    <- exp(LCfitf$bx%>%as.matrix()%*%kappa_fv$`LC-FEMALE`+matrix(data = (LCfitf$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
-   mxf_lstm  <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$LSTMM+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
+   mxm_lstm  <- exp(LCfitm$bx%>%as.matrix()%*%kappa_fv$LSTMM+matrix(data = (LCfitm$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
    mxf_lstm  <- exp(LCfitf$bx%>%as.matrix()%*%kappa_fv$LSTMF+matrix(data = (LCfitf$ax)%>%as.matrix(), nrow = 100, ncol = 10))%>%round(5)
-   
    #MSE,RMSE
+   
+   MSEM <- data.frame(LC     =sum((mxm_lc  -mxm[,c(2012:2021)%>%as.character()])^2)/(10*100),
+                      LLG    =sum((mxm_llg -mxm[,c(2012:2021)%>%as.character()])^2)/(10*100),
+                      LSTM   =sum((mxm_lstm-mxm[,c(2012:2021)%>%as.character()])^2)/(10*100)
+   )%>%round(4)
+   
+   
+   MSEF <- data.frame(LC     =sum((mxf_lc  -mxf[,c(2012:2021)%>%as.character()])^2)/(10*100),
+                      LLG    =sum((mxf_llg -mxf[,c(2012:2021)%>%as.character()])^2)/(10*100),
+                      LSTM   =sum((mxf_lstm-mxf[,c(2012:2021)%>%as.character()])^2)/(10*100)
+   )%>%round(4)
+   
+   RMSEM <- data.frame(LC     =(sum((mxm_lc  -mxm[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 ,
+                       LLG    =(sum((mxm_llg -mxm[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 ,
+                       LSTM   =(sum((mxm_lstm-mxm[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 
+   )%>%round(4)
+   
+   RMSEF <- data.frame(LC     =(sum((mxf_lc  -mxf[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 ,
+                       LLG    =(sum((mxf_llg -mxf[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 ,
+                       LSTM   =(sum((mxf_lstm-mxf[,c(2012:2021)%>%as.character()])^2)/(10*100))^0.5 
+   )%>%round(4)
+   
+   
+   MAPEM <- data.frame(LC     =sum(((mxm_lc  -mxm[,c(2012:2021)%>%as.character()])/mxm[,c(2012:2021)%>%as.character()])%>%abs)/1000*100 ,
+                       LLG    =sum(((mxm_llg -mxm[,c(2012:2021)%>%as.character()])/mxm[,c(2012:2021)%>%as.character()])%>%abs)/1000*100,
+                       LSTM   =sum(((mxm_lstm-mxm[,c(2012:2021)%>%as.character()])/mxm[,c(2012:2021)%>%as.character()])%>%abs)/1000*100
+   )%>%round(4)
+  
+   
+   MAPEF <- data.frame(LC     =sum(((mxf_lc  -mxf[,c(2012:2021)%>%as.character()])/mxf[,c(2012:2021)%>%as.character()])%>%abs)/1000*100 ,
+                       LLG    =sum(((mxf_llg -mxf[,c(2012:2021)%>%as.character()])/mxf[,c(2012:2021)%>%as.character()])%>%abs)/1000*100,
+                       LSTM   =sum(((mxf_lstm-mxf[,c(2012:2021)%>%as.character()])/mxf[,c(2012:2021)%>%as.character()])%>%abs)/1000*100
+   )%>%round(4)
    
    MSEM <- sapply(c(1:100), function(i){
      data.frame(AGE=i,
