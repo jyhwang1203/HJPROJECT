@@ -233,7 +233,7 @@ LCform$kt.f$mean
                 LLG    =(sum((mxf_llg[i,]-mxf[i,c(2012:2021)%>%as.character()])^2)/10)^0.5 ,
                 LSTM   =(sum((mxf_lstm[i,]-mxf[i,c(2012:2021)%>%as.character()])^2)/10)^0.5 
      )})%>%do.call(rbind,.)
-   
+   plot(RMSEM[201:300],type="l")
    MAPEM <- sapply(c(1:100), function(i){
      data.frame(AGE=i,
                 LC     =sum(((mxf_lc[i,]-mxf[i,c(2012:2021)%>%as.character()])/mxf[i,c(2012:2021)%>%as.character()])%>%abs)/10*100 ,

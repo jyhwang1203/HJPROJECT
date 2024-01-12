@@ -43,5 +43,5 @@ ipak(pkg)
       #RAWDATA <- RAWDATA %>% filter(STD_DT<"2024-01-01")
       #write.csv(RAWDATA ,"c:/work/RAWDATA2024-02.csv")
       # RAWDATA <- RAWDATA%>%filter(variable!="MSTW"&variable!="MSJP"&variable!="MSIN"&variable!="MSDE"&variable!="MSFR")
-      RAWDATA%>%filter(variable=="MSTW")%>%dcast(STD_DT~variable)%>%cplot
+      RAWDATA%>%filter(variable=="US10Y")%>%dcast(STD_DT~variable)%>%arrange(STD_DT)
      

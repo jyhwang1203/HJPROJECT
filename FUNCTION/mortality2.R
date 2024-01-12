@@ -8,7 +8,6 @@ ipak<- function(pkg){
 pkg <-c("demography","MortalityLaws","reshape2","dplyr","reshape2","plyr",
         "nloptr","tseries","urca",'zoo','StMoMo',"TSA","ggplot2","xlsx","gridExtra")
 ipak(pkg)
-###한국(종합)
 
 
 df <- list()

@@ -5,7 +5,7 @@ ipak <- function(pkg){
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 } 
-pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape","imager","png","grid")
+pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape","imager","png","grid","BVAR","data.table")
 ipak(pkg)
   
 
@@ -27,13 +27,12 @@ dt_trans<- function(data){
   return(data)
 }
 
-cplot <- function(data){
+cplot <- function(data,name){
   data%>%reshape2::melt(id.vars = "STD_DT")%>%na.omit%>%
     ggplot(aes(x=STD_DT, y=value, col = variable,fill=variable)) +             
-    geom_line(size=1)
+    geom_line(size=1)+ggtitle(as.character(name))
 }
 
-trans_rt <- function(data,st){
   data <- data%>%data.frame()
   {if(st=="day"){
     data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log"))%>%na.omit
