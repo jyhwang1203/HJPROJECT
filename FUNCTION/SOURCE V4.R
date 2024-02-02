@@ -7,14 +7,15 @@ ipak <- function(pkg){
 } 
 pkg <-c("readxl","data.table","dplyr","zoo","writexl","plyr","openxlsx","DT",
         "lubridate","xlsx","gridExtra","quantmod","reshape","reshape2","depmixS4",
-        "shiny","shinythemes", "shinydashboard","ggplot2","quantmod","dynlm","vars","bvartools")
+        "shiny","shinythemes", "shinydashboard","ggplot2","quantmod","dynlm")
  
 ipak(pkg)
+remove.packages("bvartools")
 
       #oecd경기선행지수수
       CLI  <-  read.csv("c:/work/CLI.csv",stringsAsFactors = FALSE,header=T)
-      CLI  <-  CLI %>% as.data.frame() %>% mutate(STD_DT=paste0(CLI$TIME,"-01") %>%ymd+months(1)-days(1)) 
-
+      CLI  <- dcast(CLI,TIME ~LOCATION,  value.var = "Value")
+      CLI  <- CLI %>% as.data.frame() %>% mutate(STD_DT=paste0(CLI$TIME,"-01") %>%ymd+months(1)-days(1))
      
       RAWDATA5<- readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="FEPS")
       RAWDATA6<- readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="TPER")
@@ -32,14 +33,14 @@ ipak(pkg)
       ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="RISK")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit%>%filter(variable!="HYSP")
       #,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="ETF") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="FORECAST")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
-      ,read.csv("c:/work/RAWDATA2024-02.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
-      ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="RATE")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
-      ,readxl::read_excel("c:/work/STOCKINDEX.xlsx",sheet="Sheet1")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
+      ,read.csv("c:/work/RAWDATA2024-01.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>% filter(STD_DT<"2024-01-01")%>%na.omit
+      
+      #,readxl::read_excel("c:/work/STOCKINDEX.xlsx",sheet="Sheet1")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       )%>%as.data.table%>%mutate(variable==as.character(variable))
       write.csv(TMP ,"c:/work/RAWDATA2024-03.csv")
       #readxl::read_excel("c:/work/STOCKINDEX.xlsx",sheet="Sheet1")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit%>%dcast(STD_DT~variable)
       
-      RAWDATA <- read.csv("c:/work/RAWDATA2024-03.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
+      RAWDATA <- read.csv("c:/work/RAWDATA2024-01.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
       #RAWDATA <- RAWDATA %>% filter(STD_DT<"2024-01-01")
       #write.csv(RAWDATA ,"c:/work/RAWDATA2024-02.csv")
       # RAWDATA <- RAWDATA%>%filter(variable!="MSTW"&variable!="MSJP"&variable!="MSIN"&variable!="MSDE"&variable!="MSFR")

@@ -33,6 +33,8 @@ cplot <- function(data,name){
     geom_line(size=1)+ggtitle(as.character(name))
 }
 
+trans_rt <- function(data,st){
+
   data <- data%>%data.frame()
   {if(st=="day"){
     data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log"))%>%na.omit

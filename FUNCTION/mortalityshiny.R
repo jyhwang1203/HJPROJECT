@@ -1,9 +1,12 @@
-  ALPHA <- data.frame(STD_DT=LCfit$ages ,TOTAL= LCfit$ax%>%as.numeric,MALE=LCfitm$ax%>%as.numeric,FEMALE=LCfitf$ax%>%as.numeric)
+source("c:/Users/ghkdw/OneDrive/Documents/GitHub/HJPROJECT/FUNCTION/llmodel V3.R")  
+
+ALPHA <- data.frame(STD_DT=LCfit$ages ,TOTAL= LCfit$ax%>%as.numeric,MALE=LCfitm$ax%>%as.numeric,FEMALE=LCfitf$ax%>%as.numeric)
   data1 <- LCfit$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data2 <- LCfitm$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data3 <- LCfitf$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   
-  
+  which(cusum(data1)==max(cusum(data1)))
+  which(cusum(data3)==max(cusum(data3)))
   
       ui <- navbarPage("LI-LEE류",theme = shinytheme("flatly"),
          tabPanel("기대여명",dashboardPage(dashboardHeader(),
@@ -21,8 +24,8 @@
                box(plotOutput("CUSUM"), width =6, solidHeader = TRUE)),
              fluidRow(shinydashboard::valueBox("Lee-Carter","미래예측",color="red", width = 12)),
              fluidRow(
-               box(plotOutput("KAPPAVF"), width =6, solidHeader = TRUE),
-               box(plotOutput("MORVF"), width =6, solidHeader = TRUE)),
+               box(plotOutput("KAPPAM"), width =6, solidHeader = TRUE),
+               box(plotOutput("KAPPAF"), width =6, solidHeader = TRUE)),
              fluidRow(
                box(DTOutput("MSE"), width  =4, solidHeader = TRUE),
                box(DTOutput("RMSE"), width =4, solidHeader = TRUE),
@@ -51,8 +54,11 @@
           data.frame(STD_DT=c(1970:2071), TOTAL=c(LCfit$kt,LCfor$kt.f$mean),MALE=c(LCfitm$kt,LCform$kt.f$mean),FEMALE=c(LCfitf$kt,LCforf$kt.f$mean))%>%
               cplot(.,"KAPPAF")
           })
-          output$KAPPAVF <- renderPlot({
-            kappa_fv%>%cplot(.,"Kappa")
+          output$KAPPAF <- renderPlot({
+            kappa_fvf%>%cplot(.,"Kappa")
+          })
+          output$KAPPAM <- renderPlot({
+            kappa_fvm%>%cplot(.,"Kappa")
           })
           output$MORVF <- renderPlot({
             cbind(STD_DT=c(2012:2021),REAL=mxm[input$age,c(2012:2021)%>%as.character()],LC=mxm_lc[input$age,],
@@ -72,3 +78,4 @@
   
   shinyApp(ui, server)
   
+

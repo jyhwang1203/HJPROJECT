@@ -1,4 +1,25 @@
-RES1 <- RAWDATA%>%filter(variable=="USLABOR"|variable=="AHEYOY"|variable=="AHEMOM"|variable=="NFPTCH")%>%dcast(STD_DT~variable)%>%
+RES1 <- RAWDATA%>%filter(variable=="FEPS_KOSPI"|variable=="KOSPI"|variable=="USDKRW"|variable=="US10Y"|variable=="KR10Y")%>%dcast(STD_DT~variable)
+RES4<- RES4%>%left_join(RAWDATA%>%filter(variable=="USBR")%>%dcast(STD_DT~variable),by="STD_DT")
+
+RES3 <-RAWDATA%>%filter(variable=="USCPIYOY"|variable=="KRCPIYOY")%>%dcast(STD_DT~variable)
+
+RES2 <- RAWDATA%>%filter(variable=="SP500"|variable=="USGOVT")%>%dcast(STD_DT~variable)%>%trans_rt("day")%>%dt_trans%>%
+  mutate(BM =0.6*SP500+0.4*USGOVT)%>%left_join(RAWDATA%>%filter(variable=="USBR")%>%dcast(STD_DT~variable),by="STD_DT")
+
+RAWDATA%>%filter(variable=="WORLD"|variable=="WRBOND")%>%dcast(STD_DT~variable)%>%trans_rt("day")%>%dt_trans%>%
+  mutate(BM =0.6*WORLD+0.4*WRBOND)%>% apply.yearly(., Return.cumulative)
+
+CLI<- CLI %>% dplyr::select(STD_DT,USA,GBR,DEU,JPN,CHN,KOR)
+
+write.xlsx(RES1 ,"c:/work/monthly.xlsx", sheetName="RES1",append=F)
+write.xlsx(RES2 ,"c:/work/monthly.xlsx", sheetName="RES2",append=T)
+write.xlsx(RES3 ,"c:/work/monthly.xlsx", sheetName="RES3",append=T)
+write.xlsx(CLI ,"c:/work/monthly.xlsx", sheetName="RES4",append=F)
+
+
+
+
+  RES1 <- RAWDATA%>%filter(variable=="FEPSE_KOSPI"|variable=="AHEYOY"|variable=="AHEMOM"|variable=="NFPTCH")%>%dcast(STD_DT~variable)%>%
   mutate(rolling_avg60 = rollmean(NFPTCH, k=12, fill=NA, align='right'))%>%left_join(
   RAWDATA%>%filter(variable=="USBR")%>%dcast(STD_DT~variable),by="STD_DT")
 
@@ -76,13 +97,15 @@ shinyApp(ui, server)
 #ROLL_COR%>%dplyr::select(-c(SP500,USGOVT))
 
 tmp   <- RAWDATA%>%filter(variable=="SP500"|variable=="KOSPI"|variable=="USGOVT"|variable=="KRBOND")%>%dcast(STD_DT~variable)%>% trans_rt("month")%>%dt_trans
-ttmp  <- RAWDATA%>%filter(variable=="SP500"|variable=="KOSPI"|variable=="USGOVT"|variable=="KRBOND")%>%dcast(STD_DT~variable)%>% trans_rt("week")%>%dt_trans
+ttmp  <- RAWDATA%>%filter(variable=="SP500"|variable=="KOSPI"|variable=="USGOVT"|variable=="KRBOND")%>%dcast(STD_DT~variable)%>% trans_rt("month")%>%dt_trans
 #ROLLING CORRELATION 5YEAR
 data.table(STD_DT=tmp$STD_DT,ROLLIMG5YEARWR =roll_cor(tmp$SP500, tmp$USGOVT, width = 36))
 data.table(STD_DT=tmp$STD_DT,ROLLIMG5YEARWR =roll_cor(tmp$KOSPI, tmp$KRBOND, width = 36))
-RES4 <- data.table(STD_DT=tmp$STD_DT,ROLLIMG5YEARWR =roll_cor(tmp$SP500, tmp$USGOVT, width = 60),ROLLIMG5YEARUS =roll_cor(tmp$KOSPI, tmp$KRBOND, width = 60))
+RES4 <- data.table(STD_DT=tmp$STD_DT,ROLLIMG5YEARWR =roll_cor(tmp$SP500, tmp$USGOVT, width = 36),
+                   ROLLIMG5YEARUS =roll_cor(tmp$KOSPI, tmp$KRBOND, width = 36))
 #ROLLING CORRELATION 6MONTH
-data.table(STD_DT=ttmp$STD_DT,ROLLIMG3MONTH =roll_cor(ttmp$SP500, ttmp$USGOVT, width = 26),ROLLIM3MONTH =roll_cor(ttmp$KOSPI, ttmp$KRBOND, width = 26))%>%cplot
+data.table(STD_DT=ttmp$STD_DT,ROLLIMG3MONTH =roll_cor(ttmp$SP500, ttmp$USGOVT, width = 26),
+           ROLLIM3MONTH =roll_cor(ttmp$KOSPI, ttmp$KRBOND, width = 26))%>%cplot("mm")
 
 write.xlsx(tmp ,"c:/work/monthly.xlsx", sheetName="rollcor",append=T)
 

@@ -1,16 +1,61 @@
 TMP <- RAWDATA %>% filter(variable=="DXY"|variable=="GOLD"|variable=="TIP10Y")%>%dcast(STD_DT~variable)%>%filter(STD_DT>"2000-01-01")
 TMP %>%cplot
-write.xlsx(TMP ,"c:/work/monthly.xlsx", sheetName="COVERDCALL",append=F) 
+write.xlsx(res ,"c:/work/monthly.xlsx", sheetName="res",append=F) 
 
-getSymbols('JEPI', src='yahoo')
-getSymbols('QYLD', src='yahoo')
+getSymbols('EWY', src='yahoo')
+getSymbols('SPY', src='yahoo')
 getSymbols('QQQ', src='yahoo')
-getSymbols('TBIL', src='yahoo')
-getSymbols('PAVE', src='yahoo')
-getSymbols('JEPI', src='yahoo')
-JEPI$JEPI.Adjusted %>%dt_trans()%>%melt(id.vars="STD_DT")
-%>% left_join(
-  SPY$SPY.Adjusted %>%dt_trans(), by="STD_DT") %>% na.omit%>%trans_rt("week")%>%dt_trans%>%filter(STD_DT>"2011-01-01")%>%cuml%>%cplot
+getSymbols('VGK', src='yahoo')
+getSymbols('EWJ', src='yahoo')
+getSymbols('ASHR', src='yahoo')
+getSymbols('EMXC', src='yahoo')
+getSymbols('IUSB', src='yahoo')
+getSymbols('FLOT', src='yahoo')
+getSymbols('EMB', src='yahoo')
+getSymbols('VCSH', src='yahoo')
+getSymbols('BKLN', src='yahoo')
+getSymbols('OIH', src='yahoo')
+getSymbols('REET', src='yahoo')
+
+
+TEMP <- RAWDATA %>% filter(variable=="WORLD")%>%dcast(STD_DT~variable)%>%full_join(
+  EWY$EWY.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+  SPY$SPY.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+    QQQ$QQQ.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+      VGK$VGK.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+        EWJ$EWJ.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+         
+            ASHR$ASHR.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+              EMXC$EMXC.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                IUSB$IUSB.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                  FLOT$FLOT.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                    EMB$EMB.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                      VCSH$VCSH.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                        BKLN$BKLN.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                          OIH$OIH.Adjusted %>%dt_trans(), by="STD_DT")%>% left_join(
+                            REET$REET.Adjusted %>%dt_trans(), by="STD_DT")%>%as.data.frame%>%fillf
+STDDT <- ("2024-01-23")%>%as.Date()
+std <- TEMP %>% filter(STD_DT==(STDDT))
+
+month <- TEMP %>% filter(STD_DT==(STDDT %m-%months(1)))
+month2<- TEMP %>% filter(STD_DT==(STDDT%m-%months(3)))
+month3<- TEMP %>% filter(STD_DT==(STDDT%m-%months(6)))
+year <- TEMP %>% filter(STD_DT==(STDDT%m-%years(1)))
+year2 <- TEMP %>% filter(STD_DT==(STDDT%m-%years(3)))
+
+
+ret_mon <- ((std[-1]/month[-1]-1) %>%round(4)* 100)%>%cbind(STD_DT=STDDT)%>%data.frame%>%t
+ret_mon2 <- ((std[-1]/month2[-1]-1) %>%round(4)* 100)%>%cbind(STD_DT=STDDT)%>%data.frame%>%t
+ret_mon3 <- ((std[-1]/month3[-1]-1) %>%round(4)* 100)%>%cbind(STD_DT=STDDT)%>%data.frame%>%t
+ret_yea <- ((std[-1]/year[-1]-1) %>%round(4)* 100)%>%cbind(STD_DT=STDDT)%>%data.frame%>%t
+ret_yea2 <- ((std[-1]/year2[-1]-1) %>%round(4)* 100)%>%cbind(STD_DT=STDDT)%>%data.frame%>%t
+
+res <- cbind(ret_mon,ret_mon2,ret_mon3,ret_yea,ret_yea2)%>%as.data.frame
+
+VCSH$VCSH.Adjusted %>%dt_trans()%>% left_join(
+  IUSB$IUSB.Adjusted %>%dt_trans(), by="STD_DT") %>% na.omit%>%trans_rt("week")%>%dt_trans%>%filter(STD_DT>"2011-01-01")%>%cuml%>%cplot("MM")
+AGG$AGG.Adjusted %>%dt_trans()%>% left_join(
+  VCSH$VCSH.Adjusted %>%dt_trans(), by="STD_DT") %>% na.omit%>%trans_rt("week")%>%dt_trans%>%filter(STD_DT>"2011-01-01")%>%cuml%>%cplot("MM")
 
   
 TBIL$TBIL.Adjusted%>%dt_trans()%>%trans_rt("week")%>%dt_trans%>%cuml%>%cplot
