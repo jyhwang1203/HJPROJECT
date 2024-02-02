@@ -16,7 +16,7 @@ remove.packages("bvartools")
       CLI  <-  read.csv("c:/work/CLI.csv",stringsAsFactors = FALSE,header=T)
       CLI  <- dcast(CLI,TIME ~LOCATION,  value.var = "Value")
       CLI  <- CLI %>% as.data.frame() %>% mutate(STD_DT=paste0(CLI$TIME,"-01") %>%ymd+months(1)-days(1))
-      RAWDATA <- read.csv("c:/work/RAWDATA2024V1.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
+     
       RAWDATA5<- readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="FEPS")
       RAWDATA6<- readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="TPER")
       colnames(RAWDATA5) <- paste0("FEPS_",colnames(RAWDATA5))
@@ -32,17 +32,18 @@ remove.packages("bvartools")
       ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="RISK")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit%>%filter(variable!="HYSP")
       ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="FORECAST")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       ,readxl::read_excel("c:/work/MACROH.xlsx",sheet="weekly") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
-      ,RAWDATA
+      ,read.csv("c:/work/RAWDATA2024-02.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>% filter(STD_DT<"2024-01-01")%>%na.omit
       
       )%>%as.data.table%>%mutate(variable==as.character(variable))
-      write.csv(TMP ,"c:/work/RAWDATA2024V2.csv")
-      RAWDATA <- read.csv("c:/work/RAWDATA2024V2.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
-      
-
-      RAWDATA%>%filter(variable=="WORLDT")%>%dcast(STD_DT~variable)%>%arrange(STD_DT,decreasing=T)
+      write.csv(TMP ,"c:/work/RAWDATA2024-03.csv")
+    
+      RAWDATA <- read.csv("c:/work/RAWDATA2024-03.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
+      #write.csv(RAWDATA ,"c:/work/RAWDATA2024-02.csv")
+      RAWDATA <- RAWDATA%>%filter(variable!="WORLDT")
+      TMP%>%filter(variable=="WORLDT")%>%dcast(STD_DT~variable)%>%arrange(STD_DT,decreasing=T)
       TMP<- rbind(
-      TMP,
-      readxl::read_excel("c:/work/RAWDATATMP.xlsx",sheet="Sheet1") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
+      RAWDATA,
+      readxl::read_excel("c:/work/test.xlsx",sheet="Sheet1") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       )
       TMP <- rbind(
       readxl::read_excel("c:/work/MACROH.xlsx",sheet="weekly") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
