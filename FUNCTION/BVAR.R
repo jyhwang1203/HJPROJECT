@@ -1,22 +1,18 @@
   ret <- RAWDATA%>%
-  filter(variable=="WORLD"|variable=="WRBOND"|variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSKR"|
-           variable=="KRBOND"|variable=="WREPRA"|variable=="WTI"|variable=="GOLD")%>%dcast(STD_DT~variable)%>%na.omit
+  filter(variable=="WORLDT"|variable=="MSUST"|variable=="MSEUT"|variable=="MSKRT"|variable=="MSJPT"|variable=="MSCNT"|variable=="EMEXCNT"|
+         variable=="WRBONDT"|variable=="WRGOVTT"|variable=="WRIGT"|variable=="WRHYT"|
+         variable=="SPGST"|variable=="WREPRA"|variable=="WRINFRA")%>%
+         dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans
 
-  ret <- RAWDATA%>%
-  filter(variable=="WORLD"|variable=="WRBOND"|variable=="KOSPI"|variable=="WREPRA"|variable=="WRINFRA"|
-           variable=="GSCI")%>%dcast(STD_DT~variable)%>%na.omit%>%
-  trans_rt("quarter")%>%dt_trans
-  RAWDATA %>% filter(variable=="USGDPQ")
+  ret
+  
   ret<- RAWDATA %>% filter(variable=="USCPIYOY"|variable=="USGDPQ")%>%na.omit%>%dcast(STD_DT~variable) %>% mutate(USGDPQ=USGDPQ/100)%>%
-    inner_join(ret,by="STD_DT") %>%mutate(
-   USCPIYOY=(USCPIYOY/100)%>%as.numeric()
- )
+    inner_join(ret,by="STD_DT") %>%mutate(USCPIYOY=(USCPIYOY/100)%>%as.numeric())
   
   data <- as.xts(ret[,-1],order.by = ret$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
   data <- as.xts(ret[,-1],order.by = ret$STD_DT )%>% Return.calculate(method = c("log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
   
-  
-  ret<- as.xts(ret[,-1]%>%data.frame,order.by = (ret$STD_DT)%>%as.Date )%>%data.frame
+  ret <- as.xts(ret[,-1]%>%data.frame,order.by = (ret$STD_DT)%>%as.Date )%>%data.frame
   ################################################### code chunk number 1: preliminaries
   options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
   
@@ -25,21 +21,24 @@
   ################################################### code chunk number 2: setup
   set.seed(42)
   library("BVAR")
-  
-  
-  ################################################### code chunk number 3: data
-  x <- fred_qd[1:243, c("GDPC1", "PCECC96", "GPDIC1", "HOANBS", "GDPCTPI", "FEDFUNDS")]
-  x <- fred_transform(x, codes = c(4, 4, 4, 4, 4, 1))
   x <- ret
   
   ################################################### code chunk number 4: timeseries
   op <- par(mfrow = c(2, 3), mar = c(3, 3, 1, 0.5), mgp = c(2, 0.6, 0))
-  plot(as.Date(rownames(x)), x[, "GOLD"], type = "l", xlab = "Time", ylab = "Gross domestic product")
-  plot(as.Date(rownames(x)), x[, "KRBOND"], type = "l", xlab = "Time", ylab = "Consumption expenditure")
-  plot(as.Date(rownames(x)), x[, "MSKR"], type = "l", xlab = "Time", ylab = "Private investment")
-  plot(as.Date(rownames(x)), x[, "WORLD"], type = "l", xlab = "Time", ylab = "Total hours worked")
-  plot(as.Date(rownames(x)), x[, "WREPRA"], type = "l", xlab = "Time", ylab = "GDP deflator")
-  plot(as.Date(rownames(x)), x[, "WTI"], type = "l", xlab = "Time", ylab = "Federal funds rate")
+  par(mfrow = c(4, 3))
+
+  plot(x$STD_DT, x$WORLDT, type = "l", xlab = "Time", ylab = "ACWI")
+  plot(x$STD_DT, x$MSUST , type = "l", xlab = "Time", ylab = "USA")
+  plot(x$STD_DT, x$MSEUT , type = "l", xlab = "Time", ylab = "EURO")
+  plot(x$STD_DT, x$MSJPT , type = "l", xlab = "Time", ylab = "JAPAN")
+  plot(x$STD_DT, x$MSCNT , type = "l", xlab = "Time", ylab = "CHINA")
+  plot(x$STD_DT, x$MSKRT , type = "l", xlab = "Time", ylab = "KOREA")
+  plot(x$STD_DT, x$EMEXCNT, type = "l", xlab = "Time", ylab = "EM(EXCHINA)")
+  plot(x$STD_DT, x$WRBONDT, type = "l", xlab = "Time", ylab = "GLOBAL BOND")
+  plot(x$STD_DT, x$WRGOVTT, type = "l", xlab = "Time", ylab = "GLOBAL GOVERMENTBOND")
+  plot(x$STD_DT, x$WRIGT , type = "l", xlab = "Time", ylab = "GLOBAL IG")
+  plot(x$STD_DT, x$WRHYT , type = "l", xlab = "Time", ylab = "GLOBAL HY")
+  plot(x$STD_DT, x$SPGST , type = "l", xlab = "Time", ylab = "COMMODITY")
   par(op)
   
   
@@ -89,8 +88,7 @@
     ################################################### code chunk number 17: irf_cholesky
   plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"),vars_response = c("WORLD", "WRBOND","GSCI","WREPRA"))
   plot(irf(run), area = TRUE, vars_impulse = c("USGDPQ"),vars_response = c("WORLD", "WRBOND","GSCI","WREPRA"))
-  plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"))
-  plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"))
+
   
   
   
@@ -98,35 +96,21 @@
   ################################################### code chunk number 18: predict
   predict(run) <- predict(run, horizon = 20, conf_bands = c(0.05, 0.16))
   pred <- predict(run)
-  pred$fcast[1,,]
-  pred$quants
-  pred$variables
-  sapply(c(1:8),function(t){
-  (sapply(c(1:20),function(i){
+  pred$fcast
+  RES <- (pred$quants)%>%as.data.frame
+  colnames(RES) <- pred$variables
+  
+  sapply(c(1:12),function(t){
+  (sapply(c(1:12),function(i){
     pred$fcast[,i,t] %>% median
   })+1)%>%cumprod
   })
   
-  sapply(c(1:20),function(i){
-    pred$fcast[,i,7] %>% mean
-  })
-  (sapply(c(1:12),function(i){
-    pred$fcast[,i,2] %>% mean
-  })+1)%>%cumprod
-  (sapply(c(1:20),function(i){
-    pred$fcast[,i,3] %>% mean
-  })+1)%>%cumprod
-  
-  (sapply(c(1:12),function(i){
-    pred$fcast[,i,4] %>% mean
-  })+1)%>%cumprod
-  
-  pred$variable
-  ####################
+####################T
   ############################### code chunk number 19: predict_unconditiona
-  plot(predict(run), area = TRUE, t_back = 20,vars = c("WRINFRA", "WREPRA", "GSCI"))
-  plot(predict(run), area = TRUE, t_back = 20,vars = c("WORLD", "WRBOND", "KOSPI"))
-  plot(predict(run), area = TRUE, t_back = 20)
+  plot(predict(run), area = TRUE, t_back = 20,vars = c("WORLDT", "KOSPIT","MSUST","MSEUT","MSJPT","MSCNT","EMEXCNT"))
+  plot(predict(run), area = TRUE, t_back = 20,vars = c("WRBONDT", "WRGOVTT","WRIGT","WRHYT"))
+  plot(predict(run), area = TRUE, t_back = 20,vars = c("SPGST", "WREPRA","WRINFRA"))
   ret
   
   ################################################### code chunk number 20: app_data
