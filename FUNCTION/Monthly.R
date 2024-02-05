@@ -464,7 +464,7 @@ server <- function(input, output)
 }
 shinyApp(ui, server)
 # RAWDATA%>%filter(variable=="DOW")%>%dcast(STD_DT~variable)
-stock_wek%>%filter(variable=="EM")%>%dcast(STD_DT~variable)
+
 stock_wek <- RAWDATA%>%filter(variable=="WORLD"|variable=="DOW"|variable=="NASDAQ"|variable=="MSEU"|variable=="MSUK"|variable=="MEDE"|variable=="MEFR"|variable=="MSIN"|variable=="MSBR"|
                                 variable=="MSAU"|variable=="MSCA"|variable=="KOSPI"|variable=="DM"|variable=="MSJP"|variable=="SHANGHAI"|variable=="CSI300"|variable=="HANGS"|variable=="EM")
 
@@ -486,10 +486,7 @@ FEPS_ytd <- RAWDATA%>%filter(variable=="FEPS_WORLD"|variable=="FEPS_DOW"|variabl
             filter(STD_DT<input$date)%>%
             dcast(STD_DT~variable)%>%trans_rt("year")%>%tail(n=1)%>%exname%>%dt_trans
    
-            grid.arrange(graphbar(FEPS_mon,"steelblue","주식"),graphbar(FEPS_ytd,"steelblue","FEPS"),ncol=2)
-            
-            write.xlsx(FEPS_mon ,"c:/work/monthly.xlsx", sheetName="FEPS_mon",append=T)
-            write.xlsx(FEPS_ytd ,"c:/work/monthly.xlsx", sheetName="FEPS_ytd",append=T)
+           
 
 #채권시장 정리
 bond_wek <- RAWDATA%>%filter(variable=="WRBOND"|variable=="USBOND"|variable=="USGOVT"|variable=="USIG"|variable=="USHY"|variable=="WRIG"|variable=="WRHY"|variable=="CNBOND"|variable=="KRBOND"|variable=="EUHY"|
@@ -497,14 +494,11 @@ bond_wek <- RAWDATA%>%filter(variable=="WRBOND"|variable=="USBOND"|variable=="US
 
 bond_mon <- RAWDATA%>%filter(variable=="WRBOND"|variable=="USBOND"|variable=="USGOVT"|variable=="USIG"|variable=="USHY"|variable=="WRIG"|variable=="WRHY"|variable=="CNBOND"|variable=="KRBOND"|variable=="EUHY"|
                                             variable=="EUIG"|variable=="USSHORT"|variable=="USLONG"|variable=="WRGOVT"|variable=="EUBOND"|variable=="EMGOVT"|variable=="EMGOVTL"|variable=="EMBOND")
-bond_mon%>%graphbar("orange","Montly return")           
+
 bond_ytd <- RAWDATA%>%filter(variable=="WRBOND"|variable=="USBOND"|variable=="USGOVT"|variable=="USIG"|variable=="USHY"|variable=="WRIG"|variable=="WRHY"|variable=="CNBOND"|variable=="KRBOND"|variable=="EUHY"|
                                variable=="EUIG"|variable=="USHORT"|variable=="USLONG"|variable=="WRGOVT"|variable=="EUBOND"|variable=="EMGOVT"|variable=="EMGOVTL"|variable=="EMBOND")
             
-            grid.arrange(graphbar(bond_mon,"steelblue","채권MON"),graphbar(bond_ytd,"steelblue","채권YTD"),ncol=2)
-            
-            write.xlsx(bond_mon ,"c:/work/monthly.xlsx", sheetName="bond_mon",append=T)
-            write.xlsx(bond_ytd ,"c:/work/monthly.xlsx", sheetName="bond_ytd",append=T)
+         
             
             
 #대체투자자
@@ -521,10 +515,6 @@ al_mon   <- RAWDATA%>%filter(variable=="PEF"|variable=="USREIT"|variable=="WRREI
 al_ytd   <- RAWDATA%>%filter(variable=="PEF"|variable=="USREIT"|variable=="WRREIT"|variable=="CRB"|variable=="WRINFRA"|variable=="WREPRA"|variable=="GOLD"|variable=="WTI"|variable=="USGAS"|variable=="EUGAS"|
                                variable=="BITC"|variable=="COP"|variable=="SIL"|variable=="SPAR"|variable=="HFRU"|variable=="USINFRA"|variable=="EUINFRA"|variable=="UKGAS"|variable=="SPAR")
 
-            grid.arrange(graphbar(al_mon,"steelblue","채권MON"),graphbar(al_ytd,"steelblue","채권YTD"),ncol=2)
-            
-            write.xlsx(al_mon ,"c:/work/monthly.xlsx", sheetName="al_mon",append=T)
-            write.xlsx(al_ytd ,"c:/work/monthly.xlsx", sheetName="al_ytd",append=T)
                         
 #외환
             RAWDATA%>%filter(variable=="DXY"|variable=="USDKRW"|variable=="EURO"|variable=="CNH"|variable=="EMX"|variable=="GBP"|variable=="YEN")%>%

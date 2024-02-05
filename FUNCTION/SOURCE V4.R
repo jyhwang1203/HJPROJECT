@@ -33,10 +33,9 @@ remove.packages("bvartools")
       ,readxl::read_excel("c:/work/RAWDATA2024.xlsx",sheet="FORECAST")%>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       ,readxl::read_excel("c:/work/MACROH.xlsx",sheet="weekly") %>%handling%>%as.data.table%>%melt(id.vars="STD_DT")%>%na.omit
       ,read.csv("c:/work/RAWDATA2024-02.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>% filter(STD_DT<"2024-01-01")%>%na.omit
-      
       )%>%as.data.table%>%mutate(variable==as.character(variable))
       write.csv(TMP ,"c:/work/RAWDATA2024-03.csv")
-    
+      #
       RAWDATA <- read.csv("c:/work/RAWDATA2024-03.csv",stringsAsFactors = FALSE)%>%dplyr::select(-X)%>%mutate(STD_DT=as.Date(STD_DT))%>%as.data.table%>%na.omit
       #write.csv(RAWDATA ,"c:/work/RAWDATA2024-02.csv")
       RAWDATA <- RAWDATA%>%filter(variable!="WORLDT")
