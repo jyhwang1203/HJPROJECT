@@ -1,28 +1,21 @@
   ret <- RAWDATA%>%
-  filter(variable=="WORLDT"|variable=="MSUST"|variable=="MSEUT"|variable=="MSKRT"|variable=="MSJPT"|variable=="MSCNT"|variable=="EMEXCNT"|
-         variable=="WRBONDT"|variable=="WRGOVTT"|variable=="WRIGT"|variable=="WRHYT"|
-         variable=="SPGST"|variable=="WREPRA"|variable=="WRINFRA")%>%
+  filter(variable=="WORLD"|variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSJP"|variable=="MSCN"|variable=="EMEXCN"|
+         variable=="WRBOND"|variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|
+         variable=="SPGSCIT"|variable=="WREPRA"|variable=="WRINFRA")%>%
          dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans
-
-  ret
-  
   ret<- RAWDATA %>% filter(variable=="USCPIYOY"|variable=="USGDPQ")%>%na.omit%>%dcast(STD_DT~variable) %>% mutate(USGDPQ=USGDPQ/100)%>%
     inner_join(ret,by="STD_DT") %>%mutate(USCPIYOY=(USCPIYOY/100)%>%as.numeric())
   
-  data <- as.xts(ret[,-1],order.by = ret$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
-  data <- as.xts(ret[,-1],order.by = ret$STD_DT )%>% Return.calculate(method = c("log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
-  
   ret <- as.xts(ret[,-1]%>%data.frame,order.by = (ret$STD_DT)%>%as.Date )%>%data.frame
+  ret[,-1]%>%cor
   ################################################### code chunk number 1: preliminaries
   options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
-  
-##
-  
-  ################################################### code chunk number 2: setup
+  ################################################### code chunk number 2: setup 
   set.seed(42)
+  RAWDATA%>%
+    filter(variable=="SPGSENT")
   library("BVAR")
   x <- ret
-  
   ################################################### code chunk number 4: timeseries
   op <- par(mfrow = c(2, 3), mar = c(3, 3, 1, 0.5), mgp = c(2, 0.6, 0))
   par(mfrow = c(4, 3))
@@ -45,54 +38,35 @@
   ################################################### code chunk number 5: minnesota
   mn <- bv_minnesota(lambda = bv_lambda(mode = 0.2, sd = 0.4, min = 1e-04, max = 5), 
                      alpha = bv_alpha(mode = 2), var = 1e+07)
-  
-  
   ################################################### code chunk number 6: dummies
   soc <- bv_soc(mode = 1, sd = 1, min = 1e-04, max = 50)
   sur <- bv_sur(mode = 1, sd = 1, min = 1e-04, max = 50)
-  
-  
   ################################################### code chunk number 7: priors
   priors <- bv_priors(hyper = "auto", mn = mn, soc = soc, sur = sur)
-  
-  
   ################################################### code chunk number 8: metropolis
   mh <- bv_metropolis(scale_hess = c(0.05, 1e-04, 1e-04), adjust_acc = TRUE, acc_lower = 0.25, 
                       acc_upper = 0.45)
-  
-  ################################################### code chunk number 9: bvar
+  ################################################## code chunk number 9: bvar
   run <- bvar(x, lags = 3, n_draw = 50000, n_burn = 25000, n_thin = 1, priors = priors, 
               mh = mh, verbose = TRUE)
-  
-  ################################################### code chunk number 10: print
+  ################################################## code chunk number 10: print
   print(run)
   ################################################### code chunk number 11: trace_density (eval = FALSE) plot(run) plot(run, type =
   ################################################### 'dens', vars_response = 'GDPC1', vars_impulse = 'GDPC1-lag1')
-  
   ################################################### code chunk number 12: trace_density
   summary(run)
   plot(run, type = "dens", vars_response = "WORLD", vars_impulse = "WORLD-lag1")
   ################################################### code chunk number 13: betas
   ################################################### code chunk number 14: fitted
   fitted(run, type = "mean")
-  
-  
   ################################################### code chunk number 15: residuals
   plot(residuals(run, type = "mean"), vars = c("WORLD", "WRBOND"))
-  
-  
   ################################################### code chunk number 16: irf
   opt_irf <- bv_irf(horizon = 10, identification = TRUE)
   irf(run) <- irf(run, opt_irf, conf_bands = c(0.05, 0.16))
-  
-    ################################################### code chunk number 17: irf_cholesky
-  plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"),vars_response = c("WORLD", "WRBOND","GSCI","WREPRA"))
+  ################################################### code chunk number 17: irf_cholesky
+  plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"),vars_response = c("WORLDT", "WRBONDT","WREPRAT"))
   plot(irf(run), area = TRUE, vars_impulse = c("USGDPQ"),vars_response = c("WORLD", "WRBOND","GSCI","WREPRA"))
-
-  
-  
-  
-  
   ################################################### code chunk number 18: predict
   predict(run) <- predict(run, horizon = 20, conf_bands = c(0.05, 0.16))
   pred <- predict(run)
@@ -105,14 +79,12 @@
     pred$fcast[,i,t] %>% median
   })+1)%>%cumprod
   })
-  
-####################T
+
   ############################### code chunk number 19: predict_unconditiona
   plot(predict(run), area = TRUE, t_back = 20,vars = c("WORLDT", "KOSPIT","MSUST","MSEUT","MSJPT","MSCNT","EMEXCNT"))
   plot(predict(run), area = TRUE, t_back = 20,vars = c("WRBONDT", "WRGOVTT","WRIGT","WRHYT"))
   plot(predict(run), area = TRUE, t_back = 20,vars = c("SPGST", "WREPRA","WRINFRA"))
-  ret
-  
+
   ################################################### code chunk number 20: app_data
   y <- fred_qd[1:243, c("GDPC1", "GDPCTPI", "FEDFUNDS")]
   z <- fred_transform(y, type = "fred_qd")
@@ -196,5 +168,18 @@
   plot(predict(run_app), t_back = 16)
   
   
-  FALSE
-  
+  ui <-       navbarPage("Dashboard", theme = shinytheme("flatly"),
+                         tabPanel("기준금리",dashboardPage(dashboardHeader(),
+                                                       dashboardSidebar(dateRangeInput('range',label = '',start = as.Date('1970-01-01') , end = as.Date('2023-12-31')),
+                                                                        checkboxGroupInput("country", "Variables to show:",c("미국CPI"="USCPIYOY","미국CORECPI"="USCORECPIYOY","미국기준금리"="USBR","미국10년물"="US10Y","미국2년물"="US2Y",
+                                                                                                                             "TIP10Y"="TIP10Y","BEI10Y"="BEI10Y"),selected="USCPIYOY")),
+                                                       dashboardBody(fluidRow(box(plotOutput("cpi"), width =12, solidHeader = TRUE)),
+                                                                     fluidRow(box(plotOutput("country"), width =12, solidHeader = TRUE))
+                                                       ))))
+  server <- function(input, output){
+    output$cpi   <- renderPlot({
+      RAWDATA%>%filter(variable==input$country)%>%filter(STD_DT>input$range)%>%dcast(STD_DT~variable)%>%exname%>%cplot+
+        theme(legend.text = element_text(size=15))
+    })
+  }
+  shinyApp(ui, server) 

@@ -194,7 +194,7 @@ LCform$kt.f$mean
    kappa_fv <-kappa_fv %>% left_join(LSTMKAPPA,by="STD_DT")
    tmp5 <- cbind(LCfit2$ax,LCfitm2$ax,LCfitf2$ax)
    tmp6 <- cbind(LCfit2$bx,LCfitm2$bx,LCfitf2$bx)
-   
+    
    #REAL
    mxm <- BASEKRM$Dxt/BASEKRM$Ext
    mxf <- BASEKRF$Dxt/BASEKRF$Ext
