@@ -10,8 +10,9 @@ pkg <-c("depmixS4","Rsolnp","Rdonlp2")
 ipak(pkg)
 # 패키지 불러오기
 RAWDATA%>%filter(variable=="USA")%>%dcast(STD_DT~variable)%>%View
-data1 <-  RAWDATA%>%filter(variable=="USA")%>%dcast(STD_DT~variable)%>%dplyr::select(USA)%>%na.omit%>%t%>%c
-data2 <-  RAWDATA%>%filter(variable=="SP500")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
+data1 <-  RAWDATA%>%filter(variable=="WRTIP")%>%dcast(STD_DT~variable)%>%dplyr::select(WRTIP)%>%na.omit%>%t%>%c
+data2 <-  RAWDATA%>%filter(variable=="WORLD")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
+data3 <-  RAWDATA%>%filter(variable=="WRTIP")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
 #data2 <-  retm %>% dplyr::select(INF)%>%na.omit%>%t%>%c
 data3 <-  RAWDATA%>%filter(variable=="USCPIYOY")%>%dcast(STD_DT~variable)%>%dplyr::select(USCPIYOY)%>%na.omit%>%t%>%c
 

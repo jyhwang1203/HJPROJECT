@@ -21,8 +21,11 @@
                box(plotOutput("CUSUM"), width =6, solidHeader = TRUE)),
              fluidRow(shinydashboard::valueBox("Lee-Carter","미래예측",color="red", width = 12)),
              fluidRow(
-               box(plotOutput("KAPPAVF"), width =6, solidHeader = TRUE),
-               box(plotOutput("MORVF"), width =6, solidHeader = TRUE)),
+               box(plotOutput("KAPPAVM"), width =6, solidHeader = TRUE),
+               box(plotOutput("KAPPAVF"), width =6, solidHeader = TRUE)),  
+             fluidRow(
+                 box(plotOutput("MORVM"), width =6, solidHeader = TRUE),
+                 box(plotOutput("MORVF"), width =6, solidHeader = TRUE)),
              fluidRow(
                box(DTOutput("MSE"), width  =4, solidHeader = TRUE),
                box(DTOutput("RMSE"), width =4, solidHeader = TRUE),
@@ -51,12 +54,22 @@
           data.frame(STD_DT=c(1970:2071), TOTAL=c(LCfit$kt,LCfor$kt.f$mean),MALE=c(LCfitm$kt,LCform$kt.f$mean),FEMALE=c(LCfitf$kt,LCforf$kt.f$mean))%>%
               cplot(.,"KAPPAF")
           })
+          output$KAPPAVM <- renderPlot({
+            kappa_fv[,c("STD_DT","Li-LEE-MALE","LC-MALE","변화점이후(남)","LSTMM")]%>%cplot(.,"Kappa")
+          })
           output$KAPPAVF <- renderPlot({
-            kappa_fv%>%cplot(.,"Kappa")
+            kappa_fv[,c("STD_DT","Li-LEE-FEMALE","LC-FEMALE","변화점이후(여)","LSTMF")]%>%cplot(.,"Kappa")
+          })
+          output$MORVM <- renderPlot({
+            cbind(STD_DT=c(2012:2021),REAL=mxm[input$age,c(2012:2021)%>%as.character()],LC=mxm_lc[input$age,],
+                  LLG=mxm_llg[input$age,],LSTM=mxm_lstm[input$age,],AFRERBP=mxm_abm[input$age,]
+                  )%>%as.data.frame%>%
+              cplot(.,"사망률 예측치(2012~2021)")
           })
           output$MORVF <- renderPlot({
-            cbind(STD_DT=c(2012:2021),REAL=mxm[input$age,c(2012:2021)%>%as.character()],LC=mxm_lc[input$age,],
-                  LLG=mxm_llg[input$age,],LSTM=mxm_lstm[input$age,])%>%as.data.frame%>%
+            cbind(STD_DT=c(2012:2021),REAL=mxf[input$age,c(2012:2021)%>%as.character()],LC=mxf_lc[input$age,],
+                  LLG=mxf_llg[input$age,],LSTM=mxf_lstm[input$age,],AFRERBP=mxf_abf[input$age,]
+            )%>%as.data.frame%>%
               cplot(.,"사망률 예측치(2012~2021)")
           })
           output$MSE <- renderDT({
@@ -71,4 +84,5 @@
           }
   
   shinyApp(ui, server)
+  
   

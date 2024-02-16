@@ -1,38 +1,30 @@
-  ret <- RAWDATA%>%
-  filter(variable=="WORLD"|variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSJP"|variable=="MSCN"|variable=="EMEXCN"|
-         variable=="WRBOND"|variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|
-         variable=="SPGSCIT"|variable=="WREPRA"|variable=="WRINFRA")%>%
-         dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans
-  ret<- RAWDATA %>% filter(variable=="USCPIYOY"|variable=="USGDPQ")%>%na.omit%>%dcast(STD_DT~variable) %>% mutate(USGDPQ=USGDPQ/100)%>%
-    inner_join(ret,by="STD_DT") %>%mutate(USCPIYOY=(USCPIYOY/100)%>%as.numeric())
+  SDATE <- ("2009-01-01")%>%as.Date()
+  LDATE <- ("2024-01-01")%>%as.Date()
   
+  reth <- RAWDATA%>%
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<"2024-01-01")%>%as.data.frame
+  retcum <- RAWDATA%>%
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT>"2004-01-01"&STD_DT<"2024-01-01")%>%
+    cuml%>%as.data.frame
+  retcum%>%dplyr::select(STD_DT,KRBONDH,MSKRT)%>%cplot("tt")
+  ret <- RAWDATA%>%
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+            variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
+  
+   #\ ret<- RAWDATA %>% filter(variable=="USCPIYOY"|variable=="USGDPQ")%>%na.omit%>%dcast(STD_DT~variable) %>% mutate(USGDPQ=USGDPQ/100)%>%
+   #   inner_join(ret,by="STD_DT") %>%mutate(USCPIYOY=(USCPIYOY/100)%>%as.numeric())
+   # 
   ret <- as.xts(ret[,-1]%>%data.frame,order.by = (ret$STD_DT)%>%as.Date )%>%data.frame
-  ret[,-1]%>%cor
-  ################################################### code chunk number 1: preliminaries
-  options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
-  ################################################### code chunk number 2: setup 
-  set.seed(42)
-  RAWDATA%>%
-    filter(variable=="SPGSENT")
-  library("BVAR")
-  x <- ret
-  ################################################### code chunk number 4: timeseries
-  op <- par(mfrow = c(2, 3), mar = c(3, 3, 1, 0.5), mgp = c(2, 0.6, 0))
-  par(mfrow = c(4, 3))
-
-  plot(x$STD_DT, x$WORLDT, type = "l", xlab = "Time", ylab = "ACWI")
-  plot(x$STD_DT, x$MSUST , type = "l", xlab = "Time", ylab = "USA")
-  plot(x$STD_DT, x$MSEUT , type = "l", xlab = "Time", ylab = "EURO")
-  plot(x$STD_DT, x$MSJPT , type = "l", xlab = "Time", ylab = "JAPAN")
-  plot(x$STD_DT, x$MSCNT , type = "l", xlab = "Time", ylab = "CHINA")
-  plot(x$STD_DT, x$MSKRT , type = "l", xlab = "Time", ylab = "KOREA")
-  plot(x$STD_DT, x$EMEXCNT, type = "l", xlab = "Time", ylab = "EM(EXCHINA)")
-  plot(x$STD_DT, x$WRBONDT, type = "l", xlab = "Time", ylab = "GLOBAL BOND")
-  plot(x$STD_DT, x$WRGOVTT, type = "l", xlab = "Time", ylab = "GLOBAL GOVERMENTBOND")
-  plot(x$STD_DT, x$WRIGT , type = "l", xlab = "Time", ylab = "GLOBAL IG")
-  plot(x$STD_DT, x$WRHYT , type = "l", xlab = "Time", ylab = "GLOBAL HY")
-  plot(x$STD_DT, x$SPGST , type = "l", xlab = "Time", ylab = "COMMODITY")
-  par(op)
+  x <- ret[c("MSKRT","KRBONDH","WORLDT","WRBOND","EMBOND","WREPRA","WRINFRA","GSCI")]
+  
   
   
   ################################################### code chunk number 5: minnesota
@@ -41,21 +33,110 @@
   ################################################### code chunk number 6: dummies
   soc <- bv_soc(mode = 1, sd = 1, min = 1e-04, max = 50)
   sur <- bv_sur(mode = 1, sd = 1, min = 1e-04, max = 50)
-  ################################################### code chunk number 7: priors
+  #################################################8 code chunk number 7: priors
   priors <- bv_priors(hyper = "auto", mn = mn, soc = soc, sur = sur)
   ################################################### code chunk number 8: metropolis
   mh <- bv_metropolis(scale_hess = c(0.05, 1e-04, 1e-04), adjust_acc = TRUE, acc_lower = 0.25, 
                       acc_upper = 0.45)
   ################################################## code chunk number 9: bvar
-  run <- bvar(x, lags = 3, n_draw = 50000, n_burn = 25000, n_thin = 1, priors = priors, 
+  run <- BVAR::bvar(x , lags = 1, n_draw = 50000, n_burn = 25000, n_thin = 1, priors = priors, 
               mh = mh, verbose = TRUE)
   ################################################## code chunk number 10: print
-  print(run)
+
+  pred <- predict(run, horizon = 20, conf_bands = c(0.01, 0.05))
+  summary(run)
+  ret
+  RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
+  TTMP <- lapply(c(1:8), function(i){
+  index<- (pred$variables)
+  tmp <-data.frame(STD_DT=(RT_R$STD_DT)%>%unique,t(pred$quants[,,i]),
+             reth%>%filter(STD_DT>"2018-12-31")%>%.[,index[i]])
+  colnames(tmp) <- c("STD_DT","1%","5%","50%","95%","99%",index[i])
+  tmp
+  # data.frame(STD_DT=RT_R$STD_DT,tmp%>%t)
+  })
+  
+  TTMP[[4]]%>%cplot("ff")
+  pred$fcast
+  RES3 <- sapply(c(1:ncol(x)),function(t){
+    (sapply(c(1:20),function(i){
+      
+      pred$fcast[,i,t] %>% mean
+    })+1)%>%cumprod
+  })
+  colnames(RES3) <- pred$variables
+  RT_E <- (RES3%>%tail(n=1))^0.2
+  RT_E
+  RT<-rbind(RT_E,((1+(retcum[,-1]%>%tail(n=1)))^(1/nrow(retcum)))^4)
+  RT
+  COR_E <-(diag(vcov(run)%>%diag()%>%sqrt)%>%inv) %*% vcov(run) %*% (diag(vcov(run)%>%diag()%>%sqrt)%>%inv) 
+  colnames(COR_E)<- rownames(vcov(run))
+  COR_H<-  cor(x)
+  VOL <- (vcov(run)%>%diag%>%sqrt)*4^0.5
+  
+  xlsx::write.xlsx(RT ,"c:/work/BVAR.xlsx", sheetName="RT",append=F)
+  xlsx::write.xlsx(COR_E ,"c:/work/BVAR.xlsx", sheetName="COR_E",append=T)
+  xlsx::write.xlsx(COR_H ,"c:/work/BVAR.xlsx", sheetName="COR_H",append=T)
+  xlsx::write.xlsx(VOL ,"c:/work/BVAR.xlsx", sheetName="VOL",append=T)
+  xlsx::write.xlsx(TTMP[[1]] ,"c:/work/BVAR.xlsx", sheetName="RES1",append=T)
+  xlsx::write.xlsx(TTMP[[2]] ,"c:/work/BVAR.xlsx", sheetName="RES2",append=T)
+  xlsx::write.xlsx(TTMP[[3]] ,"c:/work/BVAR.xlsx", sheetName="RES3",append=T)
+  xlsx::write.xlsx(TTMP[[4]] ,"c:/work/BVAR.xlsx", sheetName="RES4",append=T)
+  xlsx::write.xlsx(TTMP[[5]] ,"c:/work/BVAR.xlsx", sheetName="RES5",append=T)
+  xlsx::write.xlsx(TTMP[[6]] ,"c:/work/BVAR.xlsx", sheetName="RES6",append=T)
+  xlsx::write.xlsx(TTMP[[7]] ,"c:/work/BVAR.xlsx", sheetName="RES7",append=T)
+  xlsx::write.xlsx(TTMP[[7]] ,"c:/work/BVAR.xlsx", sheetName="RES8",append=T)
+  xlsx::write.xlsx(retcum ,"c:/work/BVAR.xlsx", sheetName="rcum",append=T)
+  
+  RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
+  RT_E <- data.frame(STD_DT=RT_R$STD_DT, RES)%>%melt(id.vars = "STD_DT")
+  RT_L <- data.frame(STD_DT=RT_R$STD_DT, RES2)%>%melt(id.vars = "STD_DT")
+  RT_U <- data.frame(STD_DT=RT_R$STD_DT, RES3)%>%melt(id.vars = "STD_DT")
+  
+  RT_R%>%left_join(RT_E,by=c("STD_DT","variable")) %>% filter(variable=="WORLD")%>%.[,-2]%>%cplot("dd")
+  RT_R%>%left_join(RT_E,by=c("STD_DT","variable")) %>% filter(variable=="WRBOND")%>%.[,-2]%>%cplot("dd")
+  RT_R%>%left_join(RT_E,by=c("STD_DT","variable"))%>%
+    left_join(RT_L,by=c("STD_DT","variable"))%>%
+    left_join(RT_U,by=c("STD_DT","variable"))%>% filter(variable=="EMBOND")%>%.[,-2]%>%cplot("dd")
+  
+  
+  RES3 <- sapply(c(1:7),function(t){
+    (sapply(c(1:20),function(i){
+      
+      pred$fcast[,i,t] %>% quantile(prob=0.99)
+    })+1)
+  })-1
+  colnames(RES3) <- pred$variables
+  
+  rt_l1  <- (RES%>%tail(n=1))^0.2
+  rt1 <- (RES%>%tail(n=1))^0.2
+  rt_l1
+  rt_l2
+  vcov(run)
+  coef(run)
+  vcov(run)%>%diag()%>%sqrt%>%det
+  cor <-(diag(vcov(run)%>%diag()%>%sqrt)%>%inv) %*% vcov(run) %*% (diag(vcov(run)%>%diag()%>%sqrt)%>%inv)
+  colnames(cor)<- rownames(vcov(run))
+  cor(ret)
+    ret <- RAWDATA%>%
+    filter(variable=="WORLD"|variable=="MSKR"|
+             variable=="WRBOND"|variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
+  
+  # 
+  plot(ret[,7],type="l")
+  ################################################### code chunk number 1: preliminaries
+  options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)
+  ################################################### code chunk number 2: setup 
+  set.seed(42)
+
+  
   ################################################### code chunk number 11: trace_density (eval = FALSE) plot(run) plot(run, type =
   ################################################### 'dens', vars_response = 'GDPC1', vars_impulse = 'GDPC1-lag1')
   ################################################### code chunk number 12: trace_density
   summary(run)
-  plot(run, type = "dens", vars_response = "WORLD", vars_impulse = "WORLD-lag1")
+  plot(run, type = "dens", vars_response = "WORLD", vars_impulse = "WRBOND")
   ################################################### code chunk number 13: betas
   ################################################### code chunk number 14: fitted
   fitted(run, type = "mean")
@@ -65,25 +146,24 @@
   opt_irf <- bv_irf(horizon = 10, identification = TRUE)
   irf(run) <- irf(run, opt_irf, conf_bands = c(0.05, 0.16))
   ################################################### code chunk number 17: irf_cholesky
-  plot(irf(run), area = TRUE, vars_impulse = c("USCPIYOY"),vars_response = c("WORLDT", "WRBONDT","WREPRAT"))
-  plot(irf(run), area = TRUE, vars_impulse = c("USGDPQ"),vars_response = c("WORLD", "WRBOND","GSCI","WREPRA"))
+  plot(irf(run), area = TRUE, vars_impulse = c("WORLDT"),vars_response = c("MSKRT","WRBOND","WREPRA","WRINFRA"))
+  plot(irf(run), area = TRUE, vars_impulse = c("신흥국채권"))
   ################################################### code chunk number 18: predict
-  predict(run) <- predict(run, horizon = 20, conf_bands = c(0.05, 0.16))
-  pred <- predict(run)
-  pred$fcast
-  RES <- (pred$quants)%>%as.data.frame
-  colnames(RES) <- pred$variables
-  
-  sapply(c(1:12),function(t){
-  (sapply(c(1:12),function(i){
-    pred$fcast[,i,t] %>% median
-  })+1)%>%cumprod
-  })
 
+  pred$fcast[,,1]
+  pred$fcast[,,15]
+  run$fcast
+  vcov(run)
+  coef(run)
+  logLik(run)#2485
+ 
+  
+    xlsx::write.xlsx(RES ,"c:/work/BVAR.xlsx", sheetName="RT",append=F)
+    xlsx::write.xlsx(RT_H ,"c:/work/BVAR.xlsx", sheetName="RT_H",append=T)
   ############################### code chunk number 19: predict_unconditiona
-  plot(predict(run), area = TRUE, t_back = 20,vars = c("WORLDT", "KOSPIT","MSUST","MSEUT","MSJPT","MSCNT","EMEXCNT"))
-  plot(predict(run), area = TRUE, t_back = 20,vars = c("WRBONDT", "WRGOVTT","WRIGT","WRHYT"))
-  plot(predict(run), area = TRUE, t_back = 20,vars = c("SPGST", "WREPRA","WRINFRA"))
+  plot(predict(run), area = TRUE, t_back = 20,vars = c("WORLD", "MSKR","MSUS","MSEU","MSJP","MSCN","EMEXCN"))
+  plot(predict(run), area = TRUE, t_back = 20)
+  plot(predict(run), area = TRUE, t_back = 20,vars = c("해외주식(Total)"))
 
   ################################################### code chunk number 20: app_data
   y <- fred_qd[1:243, c("GDPC1", "GDPCTPI", "FEDFUNDS")]
@@ -166,7 +246,22 @@
   
   ################################################### code chunk number 32: app_predict_conditional
   plot(predict(run_app), t_back = 16)
+  ################################################### code chunk number 4: timeseries
+  par(mfrow = c(4, 3))
   
+  plot(x$STD_DT, x$WORLDT, type = "l", xlab = "Time", ylab = "ACWI")
+  plot(x$STD_DT, x$MSUST , type = "l", xlab = "Time", ylab = "USA")
+  plot(x$STD_DT, x$MSEUT , type = "l", xlab = "Time", ylab = "EURO")
+  plot(x$STD_DT, x$MSJPT , type = "l", xlab = "Time", ylab = "JAPAN")
+  plot(x$STD_DT, x$MSCNT , type = "l", xlab = "Time", ylab = "CHINA")
+  plot(x$STD_DT, x$MSKRT , type = "l", xlab = "Time", ylab = "KOREA")
+  plot(x$STD_DT, x$EMEXCNT, type = "l", xlab = "Time", ylab = "EM(EXCHINA)")
+  plot(x$STD_DT, x$WRBONDT, type = "l", xlab = "Time", ylab = "GLOBAL BOND")
+  plot(x$STD_DT, x$WRGOVTT, type = "l", xlab = "Time", ylab = "GLOBAL GOVERMENTBOND")
+  plot(x$STD_DT, x$WRIGT , type = "l", xlab = "Time", ylab = "GLOBAL IG")
+  plot(x$STD_DT, x$WRHYT , type = "l", xlab = "Time", ylab = "GLOBAL HY")
+  plot(x$STD_DT, x$SPGST , type = "l", xlab = "Time", ylab = "COMMODITY")
+  par(op)
   
   ui <-       navbarPage("Dashboard", theme = shinytheme("flatly"),
                          tabPanel("기준금리",dashboardPage(dashboardHeader(),
@@ -183,3 +278,29 @@
     })
   }
   shinyApp(ui, server) 
+  
+  RT_H <-  RAWDATA%>%
+    filter(variable=="WORLD"|variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSJP"|variable=="MSCN"|variable=="EMEXCN"|
+             variable=="WRBOND"|variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%filter(STD_DT<LDATE&STD_DT>SDATE)%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("year")%>%dt_trans 
+  
+  
+  RAWDATA%>%
+    filter(variable=="DM"|variable=="MSKR"|variable=="EM"|
+             
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("week")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)%>%cuml%>%cplot("dd")
+  
+  ret <- RAWDATA%>%
+    filter(variable=="WORLD"|variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSJP"|variable=="MSCN"|variable=="EMEXCN"|
+             variable=="WRBOND"|variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|variable=='WRTIP'|variable=="DXY"|variable=="GSCI"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
+  
+  ret <- RAWDATA%>%
+    filter(variable=="MSUS"|variable=="MSEU"|variable=="MSKR"|variable=="MSJP"|variable=="MSCN"|variable=="EMEXCN"|
+             variable=="WRGOVT"|variable=="WRIG"|variable=="WRHY"|variable=="GSCI"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
+  

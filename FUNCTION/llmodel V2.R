@@ -267,7 +267,7 @@ LCform$kt.f$mean
 
    
    
-   xlsx::write.xlsx(tmp ,"c:/work/kappa.xlsx", sheetName="tmp",append=F)
+   
    xlsx::write.xlsx(tmp1 ,"c:/work/kappa.xlsx", sheetName="tmp1",append=T)
    xlsx::write.xlsx(tmp2 ,"c:/work/kappa.xlsx", sheetName="tmp2",append=T)
    xlsx::write.xlsx(tmp3 ,"c:/work/kappa.xlsx", sheetName="tmp3",append=T)

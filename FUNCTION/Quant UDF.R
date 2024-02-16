@@ -318,4 +318,5 @@ cuml <-  function(data){
          return(tmp)
        }
 
-       RAWDATA%>%filter(variable=="OILINV")%>%dcast(STD_DT~variable) 
+       
+       
