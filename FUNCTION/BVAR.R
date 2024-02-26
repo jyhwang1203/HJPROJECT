@@ -1,30 +1,32 @@
-  SDATE <- ("2009-01-01")%>%as.Date()
+  SDATE <- ("2004-01-01")%>%as.Date()
   LDATE <- ("2024-01-01")%>%as.Date()
   
   reth <- RAWDATA%>%
-    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
-             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
-             variable=="WREPRA"|variable=="WRINFRA")%>%
     dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<"2024-01-01")%>%as.data.frame
   retcum <- RAWDATA%>%
     filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|variable=="USBOND"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<"2024-01-01")%>%as.data.frame
+  retcum <- RAWDATA%>%
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|variable=="USBOND"|
              variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
              variable=="WREPRA"|variable=="WRINFRA")%>%
-    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT>"2004-01-01"&STD_DT<"2024-01-01")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT>="2004-01-01"&STD_DT<"2024-01-01")%>%
     cuml%>%as.data.frame
-  retcum%>%dplyr::select(STD_DT,KRBONDH,MSKRT)%>%cplot("tt")
+  retcum%>%dplyr::select(STD_DT,KRBONDH,USBOND,WRBOND)%>%cplot("tt")
   ret <- RAWDATA%>%
-    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="USBOND"|
             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|
              variable=="WREPRA"|variable=="WRINFRA")%>%
-    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>=SDATE)
   
    #\ ret<- RAWDATA %>% filter(variable=="USCPIYOY"|variable=="USGDPQ")%>%na.omit%>%dcast(STD_DT~variable) %>% mutate(USGDPQ=USGDPQ/100)%>%
    #   inner_join(ret,by="STD_DT") %>%mutate(USCPIYOY=(USCPIYOY/100)%>%as.numeric())
    # 
   ret <- as.xts(ret[,-1]%>%data.frame,order.by = (ret$STD_DT)%>%as.Date )%>%data.frame
-  x <- ret[c("MSKRT","KRBONDH","WORLDT","WRBOND","EMBOND","WREPRA","WRINFRA","GSCI")]
-  
+  x <- ret[,c("MSKRT","WORLDT","KRBONDH","USBOND","EMBOND","WREPRA","WRINFRA","GSCI")]
+  retcum <- retcum[,c("MSKRT","WORLDT","KRBONDH","USBOND","EMBOND","WREPRA","WRINFRA","GSCI")]
   
   
   ################################################### code chunk number 5: minnesota
@@ -43,36 +45,48 @@
               mh = mh, verbose = TRUE)
   ################################################## code chunk number 10: print
 
-  pred <- predict(run, horizon = 20, conf_bands = c(0.01, 0.05))
+  pred <- predict(run, horizon = 8, conf_bands = c(0.01, 0.05))
   summary(run)
-  ret
-  RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
-  TTMP <- lapply(c(1:8), function(i){
-  index<- (pred$variables)
-  tmp <-data.frame(STD_DT=(RT_R$STD_DT)%>%unique,t(pred$quants[,,i]),
-             reth%>%filter(STD_DT>"2018-12-31")%>%.[,index[i]])
-  colnames(tmp) <- c("STD_DT","1%","5%","50%","95%","99%",index[i])
-  tmp
-  # data.frame(STD_DT=RT_R$STD_DT,tmp%>%t)
-  })
-  
-  TTMP[[4]]%>%cplot("ff")
-  pred$fcast
-  RES3 <- sapply(c(1:ncol(x)),function(t){
-    (sapply(c(1:20),function(i){
+  # ret
+  # RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
+  # TTMP <- lapply(c(1:ncol(ret)), function(i){
+  # index<- (pred$variables)
+  # tmp <-data.frame(STD_DT=(RT_R$STD_DT)%>%unique,t(pred$quants[,,i]),
+  #            reth%>%filter(STD_DT>"2018-12-31")%>%.[,index[i]])
+  # colnames(tmp) <- c("STD_DT","1%","5%","50%","95%","99%",index[i])
+  # tmp
+  # # data.frame(STD_DT=RT_R$STD_DT,tmp%>%t)
+  # })
+
+ # TTMP[[4]]%>%cplot("ff")
+
+  # RES3 <- sapply(c(1:ncol(x)),function(t){
+  #   (sapply(c(5:8),function(i){
+  #     
+  #     pred$fcast[,i,t]%>%mean(trim=0.1)
+  #   })+1)%>%cumprod
+  # })
+  # 
+  RES3 <- sapply(c(1:8),function(t){
+    (sapply(c(3:6),function(i){
       
-      pred$fcast[,i,t] %>% mean
-    })+1)%>%cumprod
-  })
+      pred$fcast[,i,t]
+    })+1)%>%apply(1,cumprod)%>%tail(n=1)%>%mean(trim=0.05)
+  })%>%t%>%as.data.frame
+  
+
   colnames(RES3) <- pred$variables
-  RT_E <- (RES3%>%tail(n=1))^0.2
-  RT_E
-  RT<-rbind(RT_E,((1+(retcum[,-1]%>%tail(n=1)))^(1/nrow(retcum)))^4)
+  RT_E <- (RES3%>%tail(n=1))
+  RT_E["USBOND"]<- RT_E["USBOND"] +0.02
+  RT<-rbind(RT_E,((retcum%>%tail(n=1))+1)^(4/80))
   RT
   COR_E <-(diag(vcov(run)%>%diag()%>%sqrt)%>%inv) %*% vcov(run) %*% (diag(vcov(run)%>%diag()%>%sqrt)%>%inv) 
   colnames(COR_E)<- rownames(vcov(run))
   COR_H<-  cor(x)
   VOL <- (vcov(run)%>%diag%>%sqrt)*4^0.5
+  
+  
+  
   
   xlsx::write.xlsx(RT ,"c:/work/BVAR.xlsx", sheetName="RT",append=F)
   xlsx::write.xlsx(COR_E ,"c:/work/BVAR.xlsx", sheetName="COR_E",append=T)
@@ -124,7 +138,17 @@
              variable=="WREPRA"|variable=="WRINFRA")%>%
     dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
   
-  # 
+  # TMP <- (sapply(c(1:20),function(i){
+    
+    pred$fcast[,4,1]
+    })+1)
+  apply(TMP,1,cumprod)%>%View
+  TMP2 <- apply(TMP,1,cumprod)
+  TMP2%>%tail(n=1)%>%mean
+  TMP2%>%tail(n=1)%>%median
+  (TMP2%>%tail(n=1)%>%mean)^0.2
+  RES3 %>% View
+  RES3 %>%na.omit apply(1,mean)
   plot(ret[,7],type="l")
   ################################################### code chunk number 1: preliminaries
   options(prompt = "R> ", continue = "+  ", width = 70, useFancyQuotes = FALSE)

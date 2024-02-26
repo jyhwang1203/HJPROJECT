@@ -2,9 +2,9 @@
   data1 <- LCfit$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data2 <- LCfitm$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data3 <- LCfitf$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
-  
-  
-  
+  logm_t <- (BASEKR$Dxt/BASEKR$Ext)%>%log
+  logm_m <- (BASEKRM$Dxt/BASEKRM$Ext)%>%log
+  logm_f <- (BASEKRF$Dxt/BASEKRF$Ext)%>%log
       ui <- navbarPage("LI-LEE류",theme = shinytheme("flatly"),
          tabPanel("기대여명",dashboardPage(dashboardHeader(),
           dashboardSidebar(
@@ -12,6 +12,10 @@
            textInput("age", "AGE")),
            dashboardBody(
              fluidRow(shinydashboard::valueBox("Lee-Carter","모수정정",color="red", width = 12)),
+             fluidRow(
+               box(plotOutput("LOGM"), width =6, solidHeader = TRUE),
+               box(plotOutput("LOGF"), width =6, solidHeader = TRUE)
+             ),
              fluidRow(
                box(plotOutput("ALPHA"), width =6, solidHeader = TRUE),
                box(plotOutput("BETA") , width =6, solidHeader = TRUE),
@@ -33,8 +37,14 @@
              
                         ))))
        
-      
+    
      server <- function(input, output){   
+          output$LOGM <- renderPlot({
+            data.frame(STD_DT=(logm_m%>%colnames)%>%as.numeric(),t(logm_m [c(10,30,50,70),]))%>% cplot(.,"LOGM")
+          })
+          output$LOGF <- renderPlot({
+            data.frame(STD_DT=(logm_f%>%colnames)%>%as.numeric(),t(logm_f [c(10,30,50,70),]))%>% cplot(.,"LOGF")
+          })
           output$KAPPA <- renderPlot({
           KT <- data.frame(STD_DT=LCfit$years,TOTAL=LCfit$kt%>%as.numeric,MALE=LCfitm$kt%>%as.numeric,FEMALE=LCfitf$kt%>%as.numeric)
           KT %>% cplot(.,"KAPPA")

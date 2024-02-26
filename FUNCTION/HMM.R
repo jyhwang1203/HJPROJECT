@@ -9,16 +9,17 @@ pkg <-c("depmixS4","Rsolnp","Rdonlp2")
 
 ipak(pkg)
 # 패키지 불러오기
-RAWDATA%>%filter(variable=="USA")%>%dcast(STD_DT~variable)%>%View
-data1 <-  RAWDATA%>%filter(variable=="WRTIP")%>%dcast(STD_DT~variable)%>%dplyr::select(WRTIP)%>%na.omit%>%t%>%c
-data2 <-  RAWDATA%>%filter(variable=="WORLD")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
+data1 <- CLI%>%filter(STD_DT>="2000-01-01")%>%dplyr::select(G20)%>%t%>%c
+#data1 <-  RAWDATA%>%filter(variable=="WRTIP")%>%dcast(STD_DT~variable)%>%dplyr::select(WRTIP)%>%na.omit%>%t%>%c
+#data1 <-  RAWDATA%>%filter(variable=="WORLDT")%>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
+data2 <-  RAWDATA%>%filter(variable=="WRTIP") %>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
 data3 <-  RAWDATA%>%filter(variable=="WRTIP")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
 #data2 <-  retm %>% dplyr::select(INF)%>%na.omit%>%t%>%c
 data3 <-  RAWDATA%>%filter(variable=="USCPIYOY")%>%dcast(STD_DT~variable)%>%dplyr::select(USCPIYOY)%>%na.omit%>%t%>%c
 
 # 모델 정의
-mod1 <- depmix(response = data1 ~ 1, family = gaussian(), nstates = 4, data = data.frame(data = data1))
-mod2 <- depmix(response = data2 ~ 1, family = gaussian(), nstates = 2, data = data.frame(data = data2))
+mod1 <- depmix(response = data1 ~ 1, family = gaussian(), nstates = 3, data = data.frame(data = data1))
+mod2 <- depmix(response = data2 ~ 1, family = gaussian(), nstates = 3, data = data.frame(data = data2))
 mod3 <- depmix(response = data3 ~ 1, family = gaussian(), nstates = 2, data = data.frame(data = data3))
 
 # 모델 적합
@@ -33,13 +34,13 @@ summary(fit.mod3) #1 고   2 저
 post_probs1 <- posterior(fit.mod1)
 post_probs2 <- posterior(fit.mod2)
 post_probs3 <- posterior(fit.mod3)
-x1 <- RAWDATA%>%filter(variable=="USA")%>%dcast(STD_DT~variable)%>%dplyr::select(STD_DT)
-x2 <- RAWDATA%>%filter(variable=="SP500")%>%filter(STD_DT>="1960-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%index%>%na.omit
-x3 <- RAWDATA%>%filter(variable=="USCPIYOY")%>%dcast(STD_DT~variable)%>%dplyr::select(STD_DT)
+#x1 <- RAWDATA%>%filter(variable=="USA")%>%dcast(STD_DT~variable)%>%dplyr::select(STD_DT)
+x1 <- RAWDATA%>%filter(variable=="WORLDT")%>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%index%>%na.omit
+x1 <- CLI%>%filter(STD_DT>="2000-01-01")%>%dplyr::select(STD_DT)
+x2 <- RAWDATA%>%filter(variable=="WRTIP")%>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%index%>%na.omit
 
-data.frame(STD_DT=x1,data1,STATE1=post_probs1$state)%>%left_join(data.frame(STD_DT=x2,data2,STATE2=post_probs2$state),by="STD_DT")%>%left_join(data.frame(STD_DT=x3,data3,STATE3=(post_probs3$state)),by="STD_DT")%>%
-  mutate(REGIME1=STATE1*(STATE3+1))%>%
-  mutate(REGIME2=STATE2*(STATE3+1))%>%na.omit%>%View
+data.frame(STD_DT=x1,data1,STATE1=post_probs1$state)%>%left_join(data.frame(STD_DT=x2,data2,STATE2=post_probs2$state),by="STD_DT")%>%
+  mutate(REGIME1=STATE1*(STATE2+1))%>%na.omit%>%View
   
 
 (post_probs1$state)*(post_probs2$state+1)

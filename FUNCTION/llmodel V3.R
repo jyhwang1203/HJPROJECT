@@ -1,3 +1,14 @@
+ipak<- function(pkg){ 
+  new.pkg <- pkg[!(pkg %in% installed.packages()[, "Package"])]
+  if (length(new.pkg))
+    install.packages(new.pkg, dependencies = TRUE)
+  sapply(pkg, require, character.only = TRUE)
+} 
+
+pkg <-c("demography","reshape2","dplyr","reshape2","plyr","MortCast","MortalityLaws","vars",
+        "nloptr","tseries","urca",'zoo','StMoMo',"TSA","ggplot2","xlsx","gridExtra")
+ipak(pkg)
+
 cusum <- function(data) {
   fit <-auto.arima(data)
   autoplot(forecast(fit))
@@ -20,8 +31,6 @@ cusum <- function(data) {
 
 ages.fit <- 0:99
 
-LC <- lc(link = "logit")
-wxt <- genWeightMat(ages = ages.fit, years = BASEKR$years, clip = 3)
 # 
 # kt <- data.frame(LCfit$kt%>%as.numeric ,
 #            LCfitm$kt%>%as.numeric,
@@ -29,6 +38,8 @@ wxt <- genWeightMat(ages = ages.fit, years = BASEKR$years, clip = 3)
 #            )
 
 source("c:/HWANG/HJPROJECT/FUNCTION/mortality.R")
+LC <- lc(link = "logit")
+wxt <- genWeightMat(ages = ages.fit, years = BASEKR$years, clip = 3)
 
 LCfit  <- StMoMo::fit(LC, data = BASEKR, ages.fit = ages.fit)
 LCfitm  <- StMoMo::fit(LC, data = BASEKRM, ages.fit = ages.fit)
