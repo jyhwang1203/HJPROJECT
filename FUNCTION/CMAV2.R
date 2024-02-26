@@ -16,7 +16,7 @@
     RAWDATA%>%
       filter(variable=="EM")
     
-    
+    ####
     RAWDATA%>%
       filter(variable=="WORLD"|variable=="WRBOND"|variable=="WRIG"|variable=="WRGOVT"|variable=="USIG")%>%
       dcast(STD_DT~variable)%>%
