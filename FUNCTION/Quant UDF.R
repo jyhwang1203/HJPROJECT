@@ -5,7 +5,8 @@ ipak <- function(pkg){
     install.packages(new.pkg, dependencies = TRUE)
   sapply(pkg, require, character.only = TRUE)
 } 
-pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape","imager","png","grid","BVAR","data.table")
+pkg <-c("ggplot2","roll","quantmod","PerformanceAnalytics","reshape","imager","png","grid","BVAR",
+        "data.table","n")
 ipak(pkg)
   
 
@@ -46,7 +47,7 @@ trans_rt <- function(data,st){
       data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.monthly(., Return.cumulative)%>%na.omit
     }
     else if(st=="quarter"){
-      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.quarterly(., Return.cumulative)%>%na.omit
+      data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("log")) %>% apply.quarterly(., Return.cumulative)%>%na.omit
     }
     else if(st=="year"){
       data <- as.xts(data[,-1],order.by = data$STD_DT )%>% Return.calculate(method = c("discrete", "log")) %>% apply.yearly(., Return.cumulative)%>%na.omit
@@ -254,7 +255,9 @@ cuml <-  function(data){
                       "AUBR"="호주기준금리",
                       "BRBR"="브라질기준금리",
                       "INBR"="인도기준금리",
-                      "UKCPI"="영국CPI(YoY)"
+                      "UKCPI"="영국CPI(YoY)",
+                      "MSKRT"="한국주식(Total)",
+                      "WORLDT"="해외주식(Total)"
                            ))
      }
      

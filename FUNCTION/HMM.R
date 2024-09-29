@@ -6,10 +6,16 @@ ipak <- function(pkg){
   sapply(pkg, require, character.only = TRUE)
 } 
 pkg <-c("depmixS4","Rsolnp","Rdonlp2")
-
 ipak(pkg)
+
+CLI      <- readxl::read_excel("c:/work/data_rg.xlsx",sheet="CLI")
+INF      <- readxl::read_excel("c:/work/data_rg.xlsx",sheet="INF")
+
+DT_RG <- CLI %>% full_join(INF,by="STD_DT")
+DT_RG%>%View
 # 패키지 불러오기
-data1 <- CLI%>%filter(STD_DT>="2000-01-01")%>%dplyr::select(G20)%>%t%>%c
+data1  <-  DT_RG%>%filter(STD_DT>="2000-01-01")%>%dplyr::select(G20)%>%t%>%c
+DT_RG%>%filter(STD_DT>="2000-01-01")%>%dplyr::select(CLIG20)%>%t%>%c
 #data1 <-  RAWDATA%>%filter(variable=="WRTIP")%>%dcast(STD_DT~variable)%>%dplyr::select(WRTIP)%>%na.omit%>%t%>%c
 #data1 <-  RAWDATA%>%filter(variable=="WORLDT")%>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c
 data2 <-  RAWDATA%>%filter(variable=="WRTIP") %>%filter(STD_DT>="2000-01-01")%>%dcast(STD_DT~variable)%>%trans_rt("month")%>%na.omit%>%round(4)%>%t%>%c

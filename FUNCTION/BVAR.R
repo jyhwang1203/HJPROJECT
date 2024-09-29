@@ -2,7 +2,10 @@
   LDATE <- ("2024-01-01")%>%as.Date()
   
   reth <- RAWDATA%>%
-    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<"2024-01-01")%>%as.data.frame
+    filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
+             variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|variable=="USBOND"|
+             variable=="WREPRA"|variable=="WRINFRA")%>%
+    dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT>=LDATE&STD_DT<"2024-01-01")%>%as.data.frame
   retcum <- RAWDATA%>%
     filter(variable=="MSKRT"|variable=="WORLDT"|variable=="WRBOND"|
              variable=='EMBOND'|variable=='GSCI'|variable=="KRBONDH"|variable=="USBOND"|
@@ -48,25 +51,24 @@
   pred <- predict(run, horizon = 8, conf_bands = c(0.01, 0.05))
   summary(run)
   # ret
-  # RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
-  # TTMP <- lapply(c(1:ncol(ret)), function(i){
-  # index<- (pred$variables)
-  # tmp <-data.frame(STD_DT=(RT_R$STD_DT)%>%unique,t(pred$quants[,,i]),
-  #            reth%>%filter(STD_DT>"2018-12-31")%>%.[,index[i]])
-  # colnames(tmp) <- c("STD_DT","1%","5%","50%","95%","99%",index[i])
-  # tmp
-  # # data.frame(STD_DT=RT_R$STD_DT,tmp%>%t)
-  # })
-
- # TTMP[[4]]%>%cplot("ff")
-
-  # RES3 <- sapply(c(1:ncol(x)),function(t){
-  #   (sapply(c(5:8),function(i){
-  #     
-  #     pred$fcast[,i,t]%>%mean(trim=0.1)
-  #   })+1)%>%cumprod
-  # })
-  # 
+   RT_R <- reth%>%filter(STD_DT>"2018-12-31")%>%melt(id.vars = "STD_DT")
+   TTMP <- lapply(c(1:ncol(ret)), function(i){
+    
+   index<- (pred$variables)
+   tmp <-data.frame(STD_DT=(RT_R$STD_DT)%>%unique,t(pred$quants[,,i]),
+              reth%>%filter(STD_DT>"2018-12-31")%>%.[,index[i]])
+   colnames(tmp) <- c("STD_DT","1%","5%","50%","95%","99%",index[i])
+   tmp
+   data.frame(STD_DT=RT_R$STD_DT,tmp%>%t)
+   })
+ #TTMP[[4]]%>%cplot("ff")
+   RES3 <- sapply(c(1:ncol(x)),function(t){
+     (sapply(c(5:8),function(i){
+  
+       pred$fcast[,i,t]%>%mean(trim=0.1)
+     })+1)%>%cumprod
+   })
+  
   RES3 <- sapply(c(1:8),function(t){
     (sapply(c(3:6),function(i){
       
@@ -138,7 +140,7 @@
              variable=="WREPRA"|variable=="WRINFRA")%>%
     dcast(STD_DT~variable)%>%na.omit%>%trans_rt("quarter")%>%dt_trans%>%filter(STD_DT<LDATE&STD_DT>SDATE)
   
-  # TMP <- (sapply(c(1:20),function(i){
+    TMP <- (sapply(c(1:20),function(i){
     
     pred$fcast[,4,1]
     })+1)
@@ -160,7 +162,7 @@
   ################################################### 'dens', vars_response = 'GDPC1', vars_impulse = 'GDPC1-lag1')
   ################################################### code chunk number 12: trace_density
   summary(run)
-  plot(run, type = "dens", vars_response = "WORLD", vars_impulse = "WRBOND")
+  plot(run, type = "dens", vars_response = "WORLDT", vars_impulse = "USBOND")
   ################################################### code chunk number 13: betas
   ################################################### code chunk number 14: fitted
   fitted(run, type = "mean")
@@ -170,8 +172,14 @@
   opt_irf <- bv_irf(horizon = 10, identification = TRUE)
   irf(run) <- irf(run, opt_irf, conf_bands = c(0.05, 0.16))
   ################################################### code chunk number 17: irf_cholesky
-  plot(irf(run), area = TRUE, vars_impulse = c("WORLDT"),vars_response = c("MSKRT","WRBOND","WREPRA","WRINFRA"))
-  plot(irf(run), area = TRUE, vars_impulse = c("신흥국채권"))
+  run$variables <- c("한국주식","해외주식","한국채권","해외채권","신흥국채권","부동산","인프라","원자재")
+  plot(irf(run), area = TRUE, vars_impulse = c("해외주식"),vars_response = c("한국채권","해외채권","원자재"))
+  plot(irf(run), area = TRUE, vars_impulse = c("해외주식"),vars_response = c("한국주식","부동산","인프라"))
+  
+  plot(irf(run), area = TRUE, vars_impulse = c("해외주식"),vars_response = c("해외채권"))
+  plot(irf(run), area = TRUE, vars_impulse = c("해외주식"),vars_response = c("한국주식"))
+  
+  
   ################################################### code chunk number 18: predict
 
   pred$fcast[,,1]

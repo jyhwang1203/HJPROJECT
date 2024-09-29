@@ -1,4 +1,5 @@
-  ALPHA <- data.frame(STD_DT=LCfit$ages ,TOTAL= LCfit$ax%>%as.numeric,MALE=LCfitm$ax%>%as.numeric,FEMALE=LCfitf$ax%>%as.numeric)
+source("c:/HWANG/HJPROJECT/FUNCTION/llmodel V3.r")  
+ALPHA <- data.frame(STD_DT=LCfit$ages ,TOTAL= LCfit$ax%>%as.numeric,MALE=LCfitm$ax%>%as.numeric,FEMALE=LCfitf$ax%>%as.numeric)
   data1 <- LCfit$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data2 <- LCfitm$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
   data3 <- LCfitf$kt%>%t%>%ts(frequency = 1,start=c(1970),end=c(2021))
@@ -13,13 +14,15 @@
            dashboardBody(
              fluidRow(shinydashboard::valueBox("Lee-Carter","모수정정",color="red", width = 12)),
              fluidRow(
-               box(plotOutput("LOGM"), width =6, solidHeader = TRUE),
-               box(plotOutput("LOGF"), width =6, solidHeader = TRUE)
+               box(plotOutput("LOGM"), width  =12, solidHeader = TRUE)
              ),
              fluidRow(
                box(plotOutput("ALPHA"), width =6, solidHeader = TRUE),
                box(plotOutput("BETA") , width =6, solidHeader = TRUE),
                                   ),
+             fluidRow(
+               box(plotOutput("TMP1"), width  =12, solidHeader = TRUE)
+             ),
              fluidRow(
                box(plotOutput("KAPPA"), width =6, solidHeader = TRUE),
                box(plotOutput("CUSUM"), width =6, solidHeader = TRUE)),
@@ -40,11 +43,15 @@
     
      server <- function(input, output){   
           output$LOGM <- renderPlot({
-            data.frame(STD_DT=(logm_m%>%colnames)%>%as.numeric(),t(logm_m [c(10,30,50,70),]))%>% cplot(.,"LOGM")
+            LOGMM<- data.frame(STD_DT=(logm_m%>%colnames)%>%as.numeric(),t(logm_m [c(10,30,50,70),]))
+            LOGMF<- data.frame(STD_DT=(logm_f%>%colnames)%>%as.numeric(),t(logm_f [c(10,30,50,70),]))
+            colnames(LOGMM)[-1] <- c("10세","30세","50세","70세")
+            colnames(LOGMF)[-1] <- c("10세","30세","50세","70세")
+            LOGMM<-LOGMM%>% cplot(.,"남자 로그사망률")
+            LOGMF<-LOGMF%>% cplot(.,"여자 로그사망률")
+            grid.arrange(LOGMM,LOGMF,ncol=2)
           })
-          output$LOGF <- renderPlot({
-            data.frame(STD_DT=(logm_f%>%colnames)%>%as.numeric(),t(logm_f [c(10,30,50,70),]))%>% cplot(.,"LOGF")
-          })
+    
           output$KAPPA <- renderPlot({
           KT <- data.frame(STD_DT=LCfit$years,TOTAL=LCfit$kt%>%as.numeric,MALE=LCfitm$kt%>%as.numeric,FEMALE=LCfitf$kt%>%as.numeric)
           KT %>% cplot(.,"KAPPA")
@@ -57,6 +64,22 @@
           BETA <- data.frame(STD_DT=LCfit$ages ,TOTAL= LCfit$bx%>%as.numeric,MALE=LCfitm$bx%>%as.numeric,FEMALE=LCfitf$bx%>%as.numeric)
           BETA %>% cplot(.,"BETA")
           })
+          output$TMP1 <- renderPlot({
+           a<- cbind(STD_DT=c(1970:2021),
+                          ARIMA=c(LCfitm$k[1,1:40]%>%as.numeric,auto.arima(LCfitm$k[1,1:40]%>%as.numeric)%>%forecast(h = 12)%>%.$mean%>%as.numeric),
+                          KAPPA=  LCfitm$k[1,1:52]%>%as.numeric
+            )%>%as.data.frame%>%
+            cplot("Kappa 예측치(남자)")
+           b<-cbind(STD_DT=c(1970:2021),
+                  ARIMA=c(LCfitf$k[1,1:40]%>%as.numeric,auto.arima(LCfitf$k[1,1:40]%>%as.numeric)%>%forecast(h = 12)%>%.$mean%>%as.numeric),
+                  KAPPA=  LCfitf$k[1,1:52]%>%as.numeric
+            )%>%as.data.frame%>%
+              cplot("Kappa 예측치(여자)") 
+            
+            grid.arrange(a,b,ncol=2)
+            
+          })
+          
           output$CUSUM <- renderPlot({
           data.frame(STD_DT=c(1970:2021), TOTAL=cusum(data1),MALE=cusum(data2),FEMALE=cusum(data3)) %>% cplot(.,"CUSUM STATISTIC")
           })
